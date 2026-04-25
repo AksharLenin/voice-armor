@@ -27,7 +27,7 @@ app.add_middleware(
 # ═══════════════════════════════════════════════════════════════
 #  Settings  (unchanged from your script)
 # ═══════════════════════════════════════════════════════════════
-PITCH_SHIFT = 0.2   # semitones (0.3–1.0 recommended, negative = lower pitch)
+PITCH_SHIFT = 0.3   # semitones (0.3–1.0 recommended, negative = lower pitch)
 
 
 def load_audio(input_file):
@@ -50,14 +50,14 @@ def protect_audio(y, sr):
     if y.ndim == 2:
         left  = librosa.effects.pitch_shift(
             y[0], sr=sr, n_steps=PITCH_SHIFT,
-            bins_per_octave=12, res_type='soxr_hq'
+            bins_per_octave=12, res_type='soxr_hq', n_fft=2048
         )
         right = librosa.effects.pitch_shift(
             y[1], sr=sr, n_steps=PITCH_SHIFT,
-            bins_per_octave=12, res_type='soxr_hq'
+            bins_per_octave=12, res_type='soxr_hq', n_fft=2048
         )
         y_shifted = np.stack([left, right], axis=0)
-    else:
+    else: 
         y_shifted = librosa.effects.pitch_shift(
             y, sr=sr, n_steps=PITCH_SHIFT,
             bins_per_octave=12, res_type='soxr_hq'
