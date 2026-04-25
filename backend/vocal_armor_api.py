@@ -7,7 +7,6 @@ import numpy as np
 import librosa
 import soundfile as sf
 import os
-import glob
 import io
 import tempfile
 from fastapi import FastAPI, UploadFile, File
@@ -16,79 +15,81 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Allow requests from your website
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace * with your domain in production
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ═══════════════════════════════════════════════════════════════
-#  Settings  (unchanged from your script)
-# ═══════════════════════════════════════════════════════════════
-PITCH_SHIFT = 0.3   # semitones (0.3–1.0 recommended, negative = lower pitch)
+PITCH_SHIFT = 0.26
 
 
 def load_audio(input_file):
-    """Load audio file, converting from AAC/MP3/OGG/M4A if needed."""
     ext = os.path.splitext(input_file)[1].lower()
     if ext in [".aac", ".mp3", ".m4a", ".ogg"]:
-        from pydub import AudioSegment
-        audio_seg = AudioSegment.from_file(input_file)
-        temp_wav  = input_file.rsplit(".", 1)[0] + "_temp.wav"
-        audio_seg.export(temp_wav, format="wav")
+        import subprocess
+        temp_wav = input_file + "_decoded.wav"
+        subprocess.run([
+            "ffmpeg", "-y", "-i", input_file,
+            "-ac", "2", "-ar", "44100",
+            "-acodec", "pcm_s16le", temp_wav
+        ], check=True, capture_output=True)
         y, sr = librosa.load(temp_wav, sr=None, mono=False)
         os.remove(temp_wav)
     else:
         y, sr = librosa.load(input_file, sr=None, mono=False)
+
+    if y.ndim == 1:
+        y = np.stack([y, y], axis=0)
+
     return y, sr
 
 
 def protect_audio(y, sr):
-    """Pitch shift — exact same logic as vocal_armor.py."""
-    if y.ndim == 2:
-        left  = librosa.effects.pitch_shift(
-            y[0], sr=sr, n_steps=PITCH_SHIFT,
-            bins_per_octave=12, res_type='soxr_hq', n_fft=2048
-        )
-        right = librosa.effects.pitch_shift(
-            y[1], sr=sr, n_steps=PITCH_SHIFT,
-            bins_per_octave=12, res_type='soxr_hq', n_fft=2048
-        )
-        y_shifted = np.stack([left, right], axis=0)
-    else: 
-        y_shifted = librosa.effects.pitch_shift(
-            y, sr=sr, n_steps=PITCH_SHIFT,
-            bins_per_octave=12, res_type='soxr_hq'
-        )
+    orig_len = y.shape[1]
+
+    left = librosa.effects.pitch_shift(
+        y[0], sr=sr, n_steps=PITCH_SHIFT,
+        bins_per_octave=12, res_type='soxr_hq', n_fft=2048
+    )
+    right = librosa.effects.pitch_shift(
+        y[1], sr=sr, n_steps=PITCH_SHIFT,
+        bins_per_octave=12, res_type='soxr_hq', n_fft=2048
+    )
+
+    # Pad or trim to exactly match original length
+    def fix_length(sig, length):
+        if len(sig) > length:
+            return sig[:length]
+        return np.pad(sig, (0, length - len(sig)))
+
+    y_shifted = np.stack([
+        fix_length(left,  orig_len),
+        fix_length(right, orig_len)
+    ], axis=0)
 
     # Normalize
     peak = np.max(np.abs(y_shifted))
     if peak > 1.0:
         y_shifted = y_shifted / peak
 
-    return y_shifted
+    return y_shifted.astype(np.float32)
 
 
 @app.post("/protect-voice")
 async def protect(audio: UploadFile = File(...)):
-    # Save uploaded file to a temp file
     suffix = os.path.splitext(audio.filename)[1] or ".wav"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         tmp.write(await audio.read())
         tmp_path = tmp.name
 
     try:
-        y, sr = load_audio(tmp_path)
+        y, sr       = load_audio(tmp_path)
         y_protected = protect_audio(y, sr)
 
-        # Write to memory buffer
         buf = io.BytesIO()
-        if y_protected.ndim == 2:
-            sf.write(buf, y_protected.T, sr, format="WAV")
-        else:
-            sf.write(buf, y_protected, sr, format="WAV")
+        sf.write(buf, y_protected.T, sr, format="WAV")
         buf.seek(0)
 
     finally:
