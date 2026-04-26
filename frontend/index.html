@@ -1565,7 +1565,7 @@
             let resultBlob = null;
             let errorMsg = null;
             try {
-                const res = await fetch('http://127.0.0.1:8000/protect-voice', { method: 'POST', body: formData });
+                const res = await fetch('https://voice-armor.onrender.com', { method: 'POST', body: formData });
                 if (res.ok) {
                     resultBlob = await res.blob();
                 } else {
