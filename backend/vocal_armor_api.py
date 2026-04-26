@@ -28,13 +28,13 @@ PITCH_SHIFT = 0.26
 def load_audio(input_file):
     ext = os.path.splitext(input_file)[1].lower()
     if ext in [".aac", ".mp3", ".m4a", ".ogg"]:
-        import subprocess
-        temp_wav = input_file + "_decoded.wav"
-        subprocess.run([
-            "ffmpeg", "-y", "-i", input_file,
-            "-ac", "2", "-ar", "44100",
-            "-acodec", "pcm_s16le", temp_wav
-        ], check=True, capture_output=True)
+        import imageio_ffmpeg
+        from pydub import AudioSegment
+        AudioSegment.converter = imageio_ffmpeg.get_ffmpeg_exe()
+        audio_seg = AudioSegment.from_file(input_file)
+        audio_seg = audio_seg.set_channels(2).set_frame_rate(44100)
+        temp_wav  = input_file + "_decoded.wav"
+        audio_seg.export(temp_wav, format="wav")
         y, sr = librosa.load(temp_wav, sr=None, mono=False)
         os.remove(temp_wav)
     else:
@@ -44,7 +44,6 @@ def load_audio(input_file):
         y = np.stack([y, y], axis=0)
 
     return y, sr
-
 
 def protect_audio(y, sr):
     orig_len = y.shape[1]

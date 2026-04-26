@@ -1,9 +1,10 @@
 fastapi
 uvicorn
-numpy
 librosa
 soundfile
-python-multipart
+numpy
+pydub
 soxr
+python-multipart
 audioread
 imageio-ffmpeg

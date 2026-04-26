@@ -64,7 +64,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Particle canvas */
         #particleCanvas {
             position: fixed;
             inset: 0;
@@ -72,7 +71,6 @@
             pointer-events: none;
         }
 
-        /* Ambient orbs */
         .orb {
             position: fixed;
             border-radius: 50%;
@@ -110,26 +108,12 @@
         }
 
         @keyframes orbFloat {
-
-            0%,
-            100% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            25% {
-                transform: translate(30px, -20px) scale(1.05);
-            }
-
-            50% {
-                transform: translate(-20px, 30px) scale(0.95);
-            }
-
-            75% {
-                transform: translate(20px, 20px) scale(1.02);
-            }
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -20px) scale(1.05); }
+            50% { transform: translate(-20px, 30px) scale(0.95); }
+            75% { transform: translate(20px, 20px) scale(1.02); }
         }
 
-        /* Nav */
         .top-nav {
             position: sticky;
             top: 0;
@@ -150,10 +134,7 @@
             text-decoration: none;
         }
 
-        .nav-brand svg {
-            width: 30px;
-            height: 30px;
-        }
+        .nav-brand svg { width: 30px; height: 30px; }
 
         .nav-brand-text {
             font-family: 'Syne', sans-serif;
@@ -163,10 +144,7 @@
             letter-spacing: -0.02em;
         }
 
-        .nav-brand-text em {
-            font-style: normal;
-            color: var(--accent);
-        }
+        .nav-brand-text em { font-style: normal; color: var(--accent); }
 
         .nav-status {
             display: flex;
@@ -187,7 +165,6 @@
             box-shadow: 0 0 8px var(--accent-glow);
         }
 
-        /* Hero */
         .hero {
             text-align: center;
             padding: 60px 0 50px;
@@ -214,11 +191,7 @@
             backdrop-filter: blur(10px);
         }
 
-        .hero-badge svg {
-            width: 14px;
-            height: 14px;
-            stroke: var(--accent);
-        }
+        .hero-badge svg { width: 14px; height: 14px; stroke: var(--accent); }
 
         .hero h1 {
             font-family: 'Syne', sans-serif;
@@ -246,7 +219,6 @@
             font-weight: 400;
         }
 
-        /* Feature pills */
         .feature-pills {
             display: flex;
             flex-wrap: wrap;
@@ -277,14 +249,8 @@
             transform: translateY(-1px);
         }
 
-        .pill svg {
-            width: 14px;
-            height: 14px;
-            stroke: var(--accent);
-            flex-shrink: 0;
-        }
+        .pill svg { width: 14px; height: 14px; stroke: var(--accent); flex-shrink: 0; }
 
-        /* Main container */
         .main-content {
             width: 100%;
             max-width: 600px;
@@ -292,7 +258,6 @@
             z-index: 1;
         }
 
-        /* Glass card */
         .card {
             background: var(--surface);
             backdrop-filter: blur(20px);
@@ -312,16 +277,12 @@
         .card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--accent-glow2), transparent);
         }
 
-        .card-body {
-            padding: 32px;
-        }
+        .card-body { padding: 32px; }
 
         .section-label {
             font-size: 10px;
@@ -343,7 +304,6 @@
             border-radius: 1px;
         }
 
-        /* Upload zone */
         .drop-zone {
             border: 1.5px dashed var(--border2);
             border-radius: var(--radius-sm);
@@ -366,17 +326,13 @@
             z-index: -1;
         }
 
-        .drop-zone:hover,
-        .drop-zone.drag-over {
+        .drop-zone:hover, .drop-zone.drag-over {
             border-color: var(--accent);
             background: var(--accent-dim);
             transform: scale(1.005);
         }
 
-        .drop-zone:hover::before,
-        .drop-zone.drag-over::before {
-            opacity: 1;
-        }
+        .drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
 
         .drop-zone input[type="file"] {
             position: absolute;
@@ -417,17 +373,9 @@
             margin-bottom: 8px;
         }
 
-        .drop-sub {
-            font-size: 13px;
-            color: var(--muted);
-        }
+        .drop-sub { font-size: 13px; color: var(--muted); }
+        .drop-sub strong { color: var(--accent); font-weight: 500; }
 
-        .drop-sub strong {
-            color: var(--accent);
-            font-weight: 500;
-        }
-
-        /* Waveform visualization */
         .waveform-wrap {
             display: none;
             margin-top: 16px;
@@ -437,17 +385,9 @@
             border: 1px solid var(--border);
         }
 
-        .waveform-wrap.show {
-            display: block;
-            animation: fadeUp 0.3s ease both;
-        }
+        .waveform-wrap.show { display: block; animation: fadeUp 0.3s ease both; }
 
-        #waveformCanvas {
-            width: 100%;
-            height: 48px;
-            display: block;
-            border-radius: 4px;
-        }
+        #waveformCanvas { width: 100%; height: 48px; display: block; border-radius: 4px; }
 
         .file-info {
             display: none;
@@ -460,17 +400,8 @@
             margin-top: 14px;
         }
 
-        .file-info.show {
-            display: flex;
-            animation: fadeUp 0.3s ease both;
-        }
-
-        .file-info svg {
-            width: 20px;
-            height: 20px;
-            stroke: var(--accent);
-            flex-shrink: 0;
-        }
+        .file-info.show { display: flex; animation: fadeUp 0.3s ease both; }
+        .file-info svg { width: 20px; height: 20px; stroke: var(--accent); flex-shrink: 0; }
 
         .file-name {
             font-size: 13px;
@@ -482,67 +413,11 @@
             font-weight: 500;
         }
 
-        .file-size {
-            font-size: 11px;
-            color: var(--muted);
-            font-family: 'DM Mono', monospace;
-        }
+        .file-size { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
 
-        /* Divider */
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0;
-        }
+        .divider { height: 1px; background: var(--border); margin: 0; }
 
-        /* Protection level */
-        .control-row {
-            padding: 24px 32px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .control-row label {
-            font-size: 12px;
-            color: var(--muted);
-            flex-shrink: 0;
-            letter-spacing: 0.06em;
-            font-weight: 500;
-        }
-
-        select {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--border2);
-            border-radius: var(--radius-xs);
-            color: var(--text);
-            font-family: 'DM Mono', monospace;
-            font-size: 13px;
-            padding: 10px 14px;
-            outline: none;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6a7e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 34px;
-            transition: all 0.2s ease;
-        }
-
-        select:hover {
-            border-color: var(--muted2);
-        }
-
-        select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-dim);
-        }
-
-        /* Action button */
-        .action-wrap {
-            padding: 0 32px 28px;
-        }
+        .action-wrap { padding: 0 32px 28px; }
 
         .btn-protect {
             width: 100%;
@@ -571,9 +446,7 @@
             transition: transform 0.6s ease;
         }
 
-        .btn-protect:not(:disabled):hover::after {
-            transform: translateX(100%);
-        }
+        .btn-protect:not(:disabled):hover::after { transform: translateX(100%); }
 
         .btn-protect:disabled {
             background: var(--surface3);
@@ -583,29 +456,17 @@
             box-shadow: none;
         }
 
-        .btn-protect:disabled::after {
-            display: none;
-        }
+        .btn-protect:disabled::after { display: none; }
 
         .btn-protect:not(:disabled):hover {
             box-shadow: 0 6px 30px var(--accent-glow), 0 0 0 1px rgba(0, 212, 170, 0.3);
             transform: translateY(-1px);
         }
 
-        .btn-protect:not(:disabled):active {
-            transform: scale(0.985) translateY(0);
-        }
+        .btn-protect:not(:disabled):active { transform: scale(0.985) translateY(0); }
 
-        /* Progress */
-        .progress-wrap {
-            display: none;
-            padding: 0 32px 24px;
-        }
-
-        .progress-wrap.show {
-            display: block;
-            animation: fadeUp 0.3s ease both;
-        }
+        .progress-wrap { display: none; padding: 0 32px 24px; }
+        .progress-wrap.show { display: block; animation: fadeUp 0.3s ease both; }
 
         .progress-status {
             display: flex;
@@ -614,25 +475,10 @@
             margin-bottom: 10px;
         }
 
-        .status-msg {
-            font-size: 12px;
-            color: var(--accent);
-            letter-spacing: 0.04em;
-            font-weight: 500;
-        }
+        .status-msg { font-size: 12px; color: var(--accent); letter-spacing: 0.04em; font-weight: 500; }
+        .progress-pct { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
 
-        .progress-pct {
-            font-size: 12px;
-            color: var(--muted);
-            font-family: 'DM Mono', monospace;
-        }
-
-        .progress-track {
-            height: 4px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-            overflow: hidden;
-        }
+        .progress-track { height: 4px; background: rgba(0, 0, 0, 0.3); border-radius: 4px; overflow: hidden; }
 
         .progress-bar {
             height: 100%;
@@ -647,32 +493,17 @@
         .progress-bar::after {
             content: '';
             position: absolute;
-            right: 0;
-            top: -2px;
-            width: 8px;
-            height: 8px;
+            right: 0; top: -2px;
+            width: 8px; height: 8px;
             background: var(--accent);
             border-radius: 50%;
             box-shadow: 0 0 10px var(--accent-glow);
         }
 
-        /* Output section */
-        .output-wrap {
-            display: none;
-            padding: 0 32px 28px;
-        }
+        .output-wrap { display: none; padding: 0 32px 28px; }
+        .output-wrap.show { display: block; animation: fadeUp 0.4s ease both; }
 
-        .output-wrap.show {
-            display: block;
-            animation: fadeUp 0.4s ease both;
-        }
-
-        .compare-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-bottom: 18px;
-        }
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
 
         .audio-card {
             background: rgba(0, 0, 0, 0.2);
@@ -682,22 +513,10 @@
             transition: all 0.3s ease;
         }
 
-        .audio-card:hover {
-            border-color: var(--border2);
-            background: rgba(0, 0, 0, 0.25);
-        }
+        .audio-card:hover { border-color: var(--border2); background: rgba(0, 0, 0, 0.25); }
+        .audio-card.accent-border { border-color: var(--border-accent); background: var(--accent-dim); }
 
-        .audio-card.accent-border {
-            border-color: var(--border-accent);
-            background: var(--accent-dim);
-        }
-
-        .audio-card-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
+        .audio-card-label { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 
         .audio-card-label span {
             font-size: 10px;
@@ -707,36 +526,12 @@
             font-weight: 600;
         }
 
-        .audio-card-label .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
+        .audio-card-label .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .dot-original { background: var(--muted); }
+        .dot-protected { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); animation: pulse 2s ease-in-out infinite; }
 
-        .dot-original {
-            background: var(--muted);
-        }
-
-        .dot-protected {
-            background: var(--accent);
-            box-shadow: 0 0 8px var(--accent-glow);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        audio {
-            width: 100%;
-            height: 34px;
-            border-radius: 4px;
-        }
-
-        .audio-dur {
-            font-size: 11px;
-            color: var(--muted);
-            margin-top: 8px;
-            text-align: right;
-            font-family: 'DM Mono', monospace;
-        }
+        audio { width: 100%; height: 34px; border-radius: 4px; }
+        .audio-dur { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: right; font-family: 'DM Mono', monospace; }
 
         .btn-download {
             width: 100%;
@@ -768,50 +563,14 @@
             transition: opacity 0.3s ease;
         }
 
-        .btn-download:hover {
-            border-color: var(--accent2);
-            box-shadow: 0 4px 20px var(--accent-glow);
-            transform: translateY(-1px);
-        }
+        .btn-download:hover { border-color: var(--accent2); box-shadow: 0 4px 20px var(--accent-glow); transform: translateY(-1px); }
+        .btn-download:hover::before { opacity: 1; }
+        .btn-download svg { width: 16px; height: 16px; stroke: var(--accent); position: relative; z-index: 1; }
+        .btn-download span { position: relative; z-index: 1; }
 
-        .btn-download:hover::before {
-            opacity: 1;
-        }
-
-        .btn-download svg {
-            width: 16px;
-            height: 16px;
-            stroke: var(--accent);
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-download span {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Trust footer */
-        .trust-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 32px;
-            border-top: 1px solid var(--border);
-        }
-
-        .trust-bar svg {
-            width: 14px;
-            height: 14px;
-            stroke: var(--muted);
-            flex-shrink: 0;
-        }
-
-        .trust-bar span {
-            font-size: 11px;
-            color: var(--muted);
-            letter-spacing: 0.02em;
-        }
+        .trust-bar { display: flex; align-items: center; gap: 10px; padding: 16px 32px; border-top: 1px solid var(--border); }
+        .trust-bar svg { width: 14px; height: 14px; stroke: var(--muted); flex-shrink: 0; }
+        .trust-bar span { font-size: 11px; color: var(--muted); letter-spacing: 0.02em; }
 
         .reset-btn {
             background: none;
@@ -826,12 +585,8 @@
             transition: all 0.2s ease;
         }
 
-        .reset-btn:hover {
-            color: var(--text);
-            border-color: var(--muted);
-        }
+        .reset-btn:hover { color: var(--text); border-color: var(--muted); }
 
-        /* How it works */
         .how-section {
             margin-top: 48px;
             width: 100%;
@@ -851,11 +606,7 @@
             letter-spacing: -0.02em;
         }
 
-        .how-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-        }
+        .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 
         .how-card {
             background: var(--surface);
@@ -872,31 +623,21 @@
         .how-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 2px;
             background: linear-gradient(90deg, transparent, var(--accent), transparent);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
-        .how-card:hover {
-            border-color: var(--border-accent);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .how-card:hover::before {
-            opacity: 1;
-        }
+        .how-card:hover { border-color: var(--border-accent); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
+        .how-card:hover::before { opacity: 1; }
 
         .how-step {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
+            width: 36px; height: 36px;
             border-radius: 50%;
             background: var(--accent-dim);
             border: 1px solid var(--border-accent);
@@ -907,235 +648,84 @@
             margin-bottom: 14px;
         }
 
-        .how-card h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
+        .how-card h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+        .how-card p { font-size: 12px; color: var(--muted); line-height: 1.6; }
 
-        .how-card p {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.6;
-        }
+        .bottom-note { text-align: center; margin-top: 48px; padding: 20px; position: relative; z-index: 1; animation: fadeUp 0.6s 0.4s ease both; }
+        .bottom-note p { font-size: 11px; color: var(--muted2); letter-spacing: 0.04em; }
+        .bottom-note a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+        .bottom-note a:hover { color: var(--accent); }
 
-        /* Footer */
-        .bottom-note {
-            text-align: center;
-            margin-top: 48px;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-            animation: fadeUp 0.6s 0.4s ease both;
-        }
-
-        .bottom-note p {
-            font-size: 11px;
-            color: var(--muted2);
-            letter-spacing: 0.04em;
-        }
-
-        .bottom-note a {
-            color: var(--muted);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .bottom-note a:hover {
-            color: var(--accent);
-        }
-
-        /* Animations */
         @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(18px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes fadeDown {
-            from {
-                opacity: 0;
-                transform: translateY(-12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         @keyframes breathe {
-
-            0%,
-            100% {
-                transform: scale(1);
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            }
-
-            50% {
-                transform: scale(1.04);
-                box-shadow: 0 4px 24px rgba(0, 212, 170, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            }
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+            50% { transform: scale(1.04); box-shadow: 0 4px 24px rgba(0, 212, 170, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
         }
 
-        .wave-bars {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            height: 22px;
-        }
+        .wave-bars { display: none; align-items: center; justify-content: center; gap: 3px; height: 22px; }
+        .wave-bars.show { display: flex; }
 
-        .wave-bars.show {
-            display: flex;
-        }
-
-        .wave-bar {
-            width: 3px;
-            background: #020d0a;
-            border-radius: 2px;
-            animation: wavePulse 1.2s ease-in-out infinite;
-        }
-
-        .wave-bar:nth-child(1) {
-            animation-delay: 0s;
-        }
-
-        .wave-bar:nth-child(2) {
-            animation-delay: 0.12s;
-        }
-
-        .wave-bar:nth-child(3) {
-            animation-delay: 0.24s;
-        }
-
-        .wave-bar:nth-child(4) {
-            animation-delay: 0.36s;
-        }
-
-        .wave-bar:nth-child(5) {
-            animation-delay: 0.48s;
-        }
+        .wave-bar { width: 3px; background: #020d0a; border-radius: 2px; animation: wavePulse 1.2s ease-in-out infinite; }
+        .wave-bar:nth-child(1) { animation-delay: 0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.12s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.24s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.36s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.48s; }
 
         @keyframes wavePulse {
-
-            0%,
-            100% {
-                height: 6px;
-                opacity: 0.5;
-            }
-
-            50% {
-                height: 18px;
-                opacity: 1;
-            }
+            0%, 100% { height: 6px; opacity: 0.5; }
+            50% { height: 18px; opacity: 1; }
         }
 
-        /* Tooltip on hover */
-        .shield-glow {
-            animation: shieldPulse 3s ease-in-out infinite;
-        }
+        .shield-glow { animation: shieldPulse 3s ease-in-out infinite; }
 
         @keyframes shieldPulse {
-
-            0%,
-            100% {
-                filter: drop-shadow(0 0 2px var(--accent-glow));
-            }
-
-            50% {
-                filter: drop-shadow(0 0 8px var(--accent-glow));
-            }
+            0%, 100% { filter: drop-shadow(0 0 2px var(--accent-glow)); }
+            50% { filter: drop-shadow(0 0 8px var(--accent-glow)); }
         }
 
-        /* Responsive */
         @media (max-width: 640px) {
-            .hero {
-                padding: 40px 0 36px;
-            }
-
-            .hero h1 {
-                font-size: 30px;
-            }
-
-            .compare-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .how-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .feature-pills {
-                gap: 8px;
-            }
-
-            .card-body {
-                padding: 24px;
-            }
-
-            .control-row {
-                padding: 20px 24px;
-            }
-
-            .action-wrap {
-                padding: 0 24px 24px;
-            }
-
-            .progress-wrap {
-                padding: 0 24px 20px;
-            }
-
-            .output-wrap {
-                padding: 0 24px 24px;
-            }
-
-            .trust-bar {
-                padding: 14px 24px;
-            }
+            .hero { padding: 40px 0 36px; }
+            .hero h1 { font-size: 30px; }
+            .compare-grid { grid-template-columns: 1fr; }
+            .how-grid { grid-template-columns: 1fr; gap: 12px; }
+            .feature-pills { gap: 8px; }
+            .card-body { padding: 24px; }
+            .action-wrap { padding: 0 24px 24px; }
+            .progress-wrap { padding: 0 24px 20px; }
+            .output-wrap { padding: 0 24px 24px; }
+            .trust-bar { padding: 14px 24px; }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Particle Canvas -->
     <canvas id="particleCanvas"></canvas>
-
-    <!-- Ambient Orbs -->
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
 
-    <!-- Nav -->
     <nav class="top-nav" id="topNav">
         <a class="nav-brand" href="#">
             <svg viewBox="0 0 36 36" fill="none" class="shield-glow">
                 <path d="M18 3L6 8.5v8.5c0 7.18 5.14 13.9 12 15.5C24.86 30.9 30 24.18 30 17V8.5L18 3z"
                     fill="rgba(0,212,170,0.12)" stroke="#00d4aa" stroke-width="1.5" />
-                <path d="M13 18l3.5 3.5 6.5-7" stroke="#00d4aa" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
+                <path d="M13 18l3.5 3.5 6.5-7" stroke="#00d4aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <span class="nav-brand-text">Vocal<em>Armor</em></span>
         </a>
@@ -1145,7 +735,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero" id="hero">
         <div class="hero-badge">
             <svg viewBox="0 0 24 24" fill="none">
@@ -1161,16 +750,14 @@
         <div class="feature-pills">
             <div class="pill">
                 <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
-                        stroke-width="1.5" />
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke-width="1.5" />
                     <path d="m9 12 2 2 4-4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
                 Imperceptible Changes
             </div>
             <div class="pill">
                 <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="1.5" stroke-linecap="round"
-                        stroke-linejoin="round" />
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
                 Real-time Processing
             </div>
@@ -1184,28 +771,22 @@
         </div>
     </section>
 
-    <!-- Main Card -->
     <div class="main-content">
         <div class="card" id="mainCard">
 
-            <!-- Upload Section -->
             <div class="card-body">
                 <div class="section-label">Upload Recording</div>
-
                 <div class="drop-zone" id="dropZone">
                     <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.m4a,.ogg,.flac,.aac">
                     <div class="drop-icon">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 12h2M6 6v12M10 9v6M14 4v16M18 8v8M22 12h-2" stroke-linecap="round"
-                                stroke-width="1.5" />
+                            <path d="M2 12h2M6 6v12M10 9v6M14 4v16M18 8v8M22 12h-2" stroke-linecap="round" stroke-width="1.5" />
                         </svg>
                     </div>
                     <div class="drop-title">Drop your audio file here</div>
-                    <div class="drop-sub">or click to browse · <strong>.wav</strong> and <strong>.mp3</strong> supported
-                    </div>
+                    <div class="drop-sub">or click to browse · <strong>.wav</strong> and <strong>.mp3</strong> supported</div>
                 </div>
 
-                <!-- Waveform -->
                 <div class="waveform-wrap" id="waveformWrap">
                     <canvas id="waveformCanvas"></canvas>
                 </div>
@@ -1222,13 +803,8 @@
             </div>
 
             <div class="divider"></div>
-
-            <!-- Protection Level -->
-
-
             <div class="divider"></div>
 
-            <!-- Action Button -->
             <div class="action-wrap" style="padding-top: 24px;">
                 <button class="btn-protect" id="btnProtect" disabled>
                     <span id="btnLabel">Protect My Voice</span>
@@ -1242,7 +818,6 @@
                 </button>
             </div>
 
-            <!-- Progress -->
             <div class="progress-wrap" id="progressWrap">
                 <div class="progress-status">
                     <span class="status-msg" id="statusMsg">Uploading…</span>
@@ -1253,7 +828,6 @@
                 </div>
             </div>
 
-            <!-- Output -->
             <div class="output-wrap" id="outputWrap">
                 <div class="section-label" style="margin-bottom:14px;">Compare Audio</div>
                 <div class="compare-grid">
@@ -1276,14 +850,13 @@
                 </div>
                 <button class="btn-download" id="btnDownload">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="1.5" />
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
                     </svg>
                     <span>Download Protected File</span>
                 </button>
             </div>
 
-            <!-- Trust bar -->
             <div class="trust-bar">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5">
                     <rect x="3" y="11" width="18" height="11" rx="2" />
@@ -1295,7 +868,6 @@
         </div>
     </div>
 
-    <!-- How it works -->
     <section class="how-section" id="howSection">
         <h2 class="how-title">How It Works</h2>
         <div class="how-grid">
@@ -1307,8 +879,7 @@
             <div class="how-card">
                 <div class="how-step">2</div>
                 <h3>Apply Shield</h3>
-                <p>Our AI adds adversarial perturbations that are inaudible to humans but disruptive to cloning models.
-                </p>
+                <p>Our AI adds adversarial perturbations that are inaudible to humans but disruptive to cloning models.</p>
             </div>
             <div class="how-card">
                 <div class="how-step">3</div>
@@ -1404,7 +975,6 @@
 
             wCtx.clearRect(0, 0, rect.width, rect.height);
 
-            // Gradient
             const grad = wCtx.createLinearGradient(0, 0, rect.width, 0);
             grad.addColorStop(0, 'rgba(0, 212, 170, 0.6)');
             grad.addColorStop(0.5, 'rgba(0, 240, 192, 0.8)');
@@ -1433,7 +1003,6 @@
             wCtx.fillStyle = grad;
             wCtx.fill();
 
-            // Center line
             wCtx.beginPath();
             wCtx.moveTo(0, amp);
             wCtx.lineTo(rect.width, amp);
@@ -1462,7 +1031,6 @@
         const protectedDur = document.getElementById('protectedDur');
         const btnDownload = document.getElementById('btnDownload');
         const btnReset = document.getElementById('btnReset');
-
         const waveformWrap = document.getElementById('waveformWrap');
 
         let selectedFile = null;
@@ -1498,24 +1066,20 @@
                 originalDur.textContent = formatDur(originalPlayer.duration);
             };
 
-            // Draw waveform
             const reader = new FileReader();
             reader.onload = function (e) {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 audioCtx.decodeAudioData(e.target.result).then(buffer => {
                     waveformWrap.classList.add('show');
-                    // Small delay to ensure DOM has rendered
                     requestAnimationFrame(() => drawWaveform(buffer));
                     audioCtx.close();
                 }).catch(() => {
-                    // If we can't decode, just hide waveform
                     waveformWrap.classList.remove('show');
                 });
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // Drag & drop
         dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
         dropZone.addEventListener('drop', e => {
@@ -1525,7 +1089,7 @@
         });
         fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
 
-        // Protect
+        // ─── Protect Button ───
         btnProtect.addEventListener('click', async () => {
             if (!selectedFile) return;
 
@@ -1536,10 +1100,12 @@
             outputWrap.classList.remove('show');
             btnReset.style.display = 'none';
 
+            // ── Updated stages with cold start warning ──
             const stages = [
-                { msg: 'Analyzing voice signature…', target: 20 },
-                { msg: 'Generating adversarial mask…', target: 50 },
-                { msg: 'Applying perturbation layer…', target: 75 },
+                { msg: 'Waking up server — first request may take 30–50s…', target: 15 },
+                { msg: 'Analyzing voice signature…', target: 40 },
+                { msg: 'Generating adversarial mask…', target: 65 },
+                { msg: 'Applying perturbation layer…', target: 85 },
                 { msg: 'Verifying protection integrity…', target: 95 },
             ];
 
@@ -1549,7 +1115,7 @@
 
             const tick = setInterval(() => {
                 const stage = stages[stageIdx];
-                pct += Math.random() * 8 + 3;
+                pct += Math.random() * 4 + 1;  // slower tick to match longer wait
                 if (pct >= stage.target) {
                     stageIdx = Math.min(stageIdx + 1, stages.length - 1);
                     statusMsg.textContent = stages[stageIdx].msg;
@@ -1557,15 +1123,26 @@
                 pct = Math.min(pct, 97);
                 progressBar.style.width = pct + '%';
                 progressPct.textContent = Math.round(pct) + '%';
-            }, 100);
+            }, 300);
 
             const formData = new FormData();
             formData.append('audio', selectedFile);
 
+            // ── 2 minute timeout to handle Render cold starts ──
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 120000);
+
             let resultBlob = null;
             let errorMsg = null;
+
             try {
-                const res = await fetch('https://voice-armor.onrender.com/protect-voice', { method: 'POST', body: formData });
+                const res = await fetch('https://voice-armor.onrender.com/protect-voice', {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
                 if (res.ok) {
                     resultBlob = await res.blob();
                 } else {
@@ -1573,28 +1150,30 @@
                     errorMsg = errData?.error || `Server error (${res.status})`;
                 }
             } catch (err) {
-                errorMsg = 'Cannot connect to server. Make sure the backend is running.';
+                clearTimeout(timeoutId);
+                if (err.name === 'AbortError') {
+                    errorMsg = 'Request timed out — server is waking up, please try again in a moment.';
+                } else {
+                    errorMsg = 'Cannot connect to server. Make sure the backend is running.';
+                }
             }
 
             clearInterval(tick);
 
             if (errorMsg) {
-                // ── Error state ──
                 progressBar.style.width = '100%';
                 progressBar.style.background = 'linear-gradient(90deg, #ff5c5c, #ff8a80)';
                 progressPct.textContent = '✗';
                 statusMsg.textContent = errorMsg;
                 statusMsg.style.color = 'var(--danger)';
 
-                await new Promise(r => setTimeout(r, 2000));
+                await new Promise(r => setTimeout(r, 3000));
 
                 progressWrap.classList.remove('show');
                 waveBars.classList.remove('show');
                 btnLabel.style.display = '';
                 btnLabel.textContent = 'Protect My Voice';
                 btnProtect.disabled = false;
-
-                // Reset progress bar styles
                 progressBar.style.width = '0%';
                 progressBar.style.background = '';
                 progressPct.textContent = '0%';
@@ -1602,7 +1181,6 @@
                 return;
             }
 
-            // ── Success state ──
             progressBar.style.width = '100%';
             progressPct.textContent = '100%';
             statusMsg.textContent = 'Protection complete ✓';
@@ -1651,7 +1229,6 @@
             protectedDur.textContent = '—';
         });
 
-        // ─── Intersection Observer for scroll animations ───
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
