@@ -101,6 +101,18 @@
         .server-banner .banner-text { flex:1;line-height:1.5; }
         .server-banner .countdown { font-family:'DM Mono',monospace;font-size:11px;color:var(--warning);opacity:.7; }
 
+        /* Config error banner */
+        .config-banner {
+            display:none;width:100%;max-width:600px;
+            background:rgba(255,92,92,.08);border:1px solid rgba(255,92,92,.3);
+            border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:16px;
+            font-size:12px;color:var(--danger);
+            flex-direction:column;gap:8px;z-index:1;position:relative;
+        }
+        .config-banner.show { display:flex; }
+        .config-banner strong { font-size:13px; }
+        .config-banner code { background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px; }
+
         .hero {
             text-align:center;padding:60px 0 50px;max-width:700px;
             position:relative;z-index:1;animation:fadeUp .8s ease both;
@@ -213,7 +225,6 @@
         .btn-protect:not(:disabled):hover { box-shadow:0 6px 30px var(--accent-glow),0 0 0 1px rgba(0,212,170,.3);transform:translateY(-1px); }
         .btn-protect:not(:disabled):active { transform:scale(.985) translateY(0); }
 
-        /* Wake-up state for button */
         .btn-protect.waking {
             background:linear-gradient(135deg,#8a6a00,var(--warning)) !important;
             color:#1a1200 !important;
@@ -242,7 +253,6 @@
         }
         .progress-bar.warning-bar::after { background:var(--warning);box-shadow:0 0 10px rgba(255,179,71,.4); }
 
-        /* Pulse animation for waking state */
         @keyframes indeterminate {
             0%   { transform:translateX(-100%); }
             100% { transform:translateX(400%); }
@@ -354,6 +364,12 @@
         </div>
     </nav>
 
+    <!-- Config error banner — shows if API_BASE is wrong -->
+    <div class="config-banner" id="configBanner">
+        <strong>⚠ Backend not reachable</strong>
+        <span>Could not connect to <code id="configUrl"></code>. Open your Render dashboard, copy your <strong>backend</strong> service URL, and update <code>API_BASE</code> in this file.</span>
+    </div>
+
     <!-- Server wake-up banner -->
     <div class="server-banner" id="serverBanner">
         <svg viewBox="0 0 24 24" fill="none">
@@ -377,7 +393,7 @@
             </div>
             <div class="pill">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                5-Layer Protection
+                10-Layer Protection
             </div>
             <div class="pill">
                 <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke-width="1.5"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -466,7 +482,7 @@
         <h2 class="how-title">How It Works</h2>
         <div class="how-grid">
             <div class="how-card"><div class="how-step">1</div><h3>Upload Audio</h3><p>Drop in any voice recording — a podcast clip, voiceover, or voice note.</p></div>
-            <div class="how-card"><div class="how-step">2</div><h3>Apply Shield</h3><p>5 adversarial layers add imperceptible perturbations that destroy AI cloning fingerprints.</p></div>
+            <div class="how-card"><div class="how-step">2</div><h3>Apply Shield</h3><p>10 adversarial layers add imperceptible perturbations that destroy AI cloning fingerprints.</p></div>
             <div class="how-card"><div class="how-step">3</div><h3>Stay Protected</h3><p>Download your armored audio. Any cloning attempt will produce garbled, unusable output.</p></div>
         </div>
     </section>
@@ -475,15 +491,17 @@
 
 <script>
 // ─── Config ───────────────────────────────────────────────
-const API_BASE        = 'https://voice-armor-1.onrender.com';
+// !! IMPORTANT: Set this to your FastAPI backend URL on Render !!
+// It is a SEPARATE service from this frontend.
+// Go to render.com → your backend service → copy the URL shown at the top.
+// Example: 'https://vocal-armor-api.onrender.com'
+const API_BASE        = 'https://vocal-armor-api.onrender.com';  // <-- UPDATE THIS
 const HEALTH_URL      = `${API_BASE}/health`;
 const PROTECT_URL     = `${API_BASE}/protect-voice`;
 
-// Render free tier cold-start can take up to 60s
-// We poll /health until it responds, then fire the real request
-const WAKE_POLL_MS    = 4000;    // how often to ping while waking
-const KEEPALIVE_MS    = 9 * 60 * 1000;  // ping every 9 min to prevent sleep
-const REQUEST_TIMEOUT = 5 * 60 * 1000;  // 5 min hard timeout on protect request
+const WAKE_POLL_MS    = 4000;
+const KEEPALIVE_MS    = 9 * 60 * 1000;
+const REQUEST_TIMEOUT = 5 * 60 * 1000;
 
 // ─── Particle System ──────────────────────────────────────
 const canvas = document.getElementById('particleCanvas');
@@ -549,14 +567,15 @@ const btnDownload    = document.getElementById('btnDownload');
 const btnReset       = document.getElementById('btnReset');
 const waveformWrap   = document.getElementById('waveformWrap');
 const serverBanner   = document.getElementById('serverBanner');
-const bannerText     = document.getElementById('bannerText');
 const bannerCountdown= document.getElementById('bannerCountdown');
 const statusDot      = document.getElementById('statusDot');
 const statusText     = document.getElementById('statusText');
+const configBanner   = document.getElementById('configBanner');
+const configUrl      = document.getElementById('configUrl');
 
 let selectedFile  = null;
 let protectedBlob = null;
-let serverAwake   = false;   // becomes true once /health responds 200
+let serverAwake   = false;
 let keepAliveTimer= null;
 let countdownTimer= null;
 
@@ -564,7 +583,6 @@ let countdownTimer= null;
 function formatSize(b){ if(b<1024)return b+' B'; if(b<1048576)return(b/1024).toFixed(1)+' KB'; return(b/1048576).toFixed(1)+' MB'; }
 function formatDur(s){ const m=Math.floor(s/60),sec=Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
 
-// AbortController-based fetch with timeout
 async function fetchWithTimeout(url, options, timeoutMs){
     const ctrl = new AbortController();
     const id    = setTimeout(()=>ctrl.abort(), timeoutMs);
@@ -576,11 +594,10 @@ async function fetchWithTimeout(url, options, timeoutMs){
     }
 }
 
-// ─── Server status UI helpers ─────────────────────────────
+// ─── Server status UI ─────────────────────────────────────
 function setNavStatus(state){
-    // state: 'checking' | 'online' | 'waking' | 'offline'
     statusDot.className = 'pulse-dot';
-    if(state === 'online')  { statusDot.classList.add(); statusText.textContent = 'System Active'; }
+    if(state === 'online')  { statusText.textContent = 'System Active'; }
     if(state === 'checking'){ statusText.textContent = 'Checking server…'; }
     if(state === 'waking')  { statusDot.classList.add('warning'); statusText.textContent = 'Server waking up…'; }
     if(state === 'offline') { statusDot.classList.add('danger');  statusText.textContent = 'Server offline'; }
@@ -589,82 +606,68 @@ function setNavStatus(state){
 function showWakeBanner(secondsElapsed){
     serverBanner.classList.add('show');
     const remaining = Math.max(0, 60 - secondsElapsed);
-    if(remaining > 0) bannerCountdown.textContent = `~${remaining}s remaining`;
-    else bannerCountdown.textContent = 'almost ready…';
+    bannerCountdown.textContent = remaining > 0 ? `~${remaining}s remaining` : 'almost ready…';
 }
 function hideWakeBanner(){ serverBanner.classList.remove('show'); }
 
 function startCountdown(){
     let elapsed = 0;
-    countdownTimer = setInterval(()=>{
-        elapsed += 1;
-        showWakeBanner(elapsed);
-        if(elapsed >= 120) clearInterval(countdownTimer); // give up showing countdown after 2 min
-    }, 1000);
+    countdownTimer = setInterval(()=>{ elapsed++; showWakeBanner(elapsed); if(elapsed>=120) clearInterval(countdownTimer); }, 1000);
 }
 function stopCountdown(){ clearInterval(countdownTimer); }
 
-// ─── Server health check & keep-alive ─────────────────────
+// ─── Health check ─────────────────────────────────────────
 async function checkHealth(){
     try {
         const res = await fetchWithTimeout(HEALTH_URL, {method:'GET'}, 8000);
         return res.ok;
-    } catch(e){
-        return false;
-    }
+    } catch(e){ return false; }
 }
 
 async function waitForServer(onWaking){
-    // First quick check
     setNavStatus('checking');
     const alive = await checkHealth();
-    if(alive){
-        serverAwake = true;
-        setNavStatus('online');
-        hideWakeBanner();
-        return true;
-    }
+    if(alive){ serverAwake=true; setNavStatus('online'); hideWakeBanner(); return true; }
 
-    // Server is sleeping — start wake-up UX
     setNavStatus('waking');
     onWaking && onWaking();
 
-    // Poll until it responds
     return new Promise((resolve)=>{
         const interval = setInterval(async ()=>{
             const alive = await checkHealth();
-            if(alive){
-                clearInterval(interval);
-                stopCountdown();
-                serverAwake = true;
-                setNavStatus('online');
-                hideWakeBanner();
-                resolve(true);
-            }
+            if(alive){ clearInterval(interval); stopCountdown(); serverAwake=true; setNavStatus('online'); hideWakeBanner(); resolve(true); }
         }, WAKE_POLL_MS);
-
-        // Give up after 3 minutes
-        setTimeout(()=>{
-            clearInterval(interval);
-            stopCountdown();
-            setNavStatus('offline');
-            resolve(false);
-        }, 3 * 60 * 1000);
+        setTimeout(()=>{ clearInterval(interval); stopCountdown(); setNavStatus('offline'); resolve(false); }, 3*60*1000);
     });
 }
 
 function startKeepAlive(){
     if(keepAliveTimer) return;
-    keepAliveTimer = setInterval(async ()=>{
-        await checkHealth(); // fire-and-forget ping
-    }, KEEPALIVE_MS);
+    keepAliveTimer = setInterval(async ()=>{ await checkHealth(); }, KEEPALIVE_MS);
 }
 
-// Initial health check on page load
+// ─── Initial health check ─────────────────────────────────
 (async ()=>{
+    setNavStatus('checking');
     const alive = await checkHealth();
-    if(alive){ serverAwake=true; setNavStatus('online'); startKeepAlive(); }
-    else { setNavStatus('waking'); }
+    if(alive){
+        serverAwake=true;
+        setNavStatus('online');
+        startKeepAlive();
+        configBanner.classList.remove('show');
+    } else {
+        // After 8s timeout, could be wrong URL or truly sleeping
+        // Try once more quickly to distinguish
+        const alive2 = await checkHealth();
+        if(alive2){
+            serverAwake=true; setNavStatus('online'); startKeepAlive();
+        } else {
+            // Show config banner with the URL being tried
+            configUrl.textContent = API_BASE;
+            configBanner.classList.add('show');
+            setNavStatus('offline');
+        }
+    }
 })();
 
 // ─── File handling ────────────────────────────────────────
@@ -723,21 +726,17 @@ btnProtect.addEventListener('click', async ()=>{
     statusMsg.textContent = stages[0].msg;
     progressBar.className = 'progress-bar';
 
-    // ── If server not yet awake, wait for it first ──
     if(!serverAwake){
-        // Switch to indeterminate waking progress
         progressBar.classList.add('indeterminate','warning-bar');
         statusMsg.classList.add('warning');
         statusMsg.textContent = 'Waking server up — please wait…';
         progressPct.textContent = '…';
         btnProtect.classList.add('waking');
-
         showWakeBanner(0);
         startCountdown();
 
         const alive = await waitForServer();
         if(!alive){
-            // Give up
             progressWrap.classList.remove('show');
             waveBars.classList.remove('show');
             btnLabel.style.display = '';
@@ -745,11 +744,11 @@ btnProtect.addEventListener('click', async ()=>{
             btnProtect.disabled = false;
             btnProtect.classList.remove('waking');
             hideWakeBanner();
-            alert('Could not reach the server after 3 minutes. Please try again later.');
+            configUrl.textContent = API_BASE;
+            configBanner.classList.add('show');
             return;
         }
 
-        // Server is awake — reset progress UI and continue
         progressBar.classList.remove('indeterminate','warning-bar');
         statusMsg.classList.remove('warning');
         statusMsg.textContent = stages[0].msg;
@@ -758,7 +757,6 @@ btnProtect.addEventListener('click', async ()=>{
         startKeepAlive();
     }
 
-    // ── Fake progress ticker ──
     const tick = setInterval(()=>{
         const stage = stages[stageIdx];
         pct += Math.random()*8+3;
@@ -768,7 +766,6 @@ btnProtect.addEventListener('click', async ()=>{
         progressPct.textContent = Math.round(pct)+'%';
     }, 120);
 
-    // ── Real API call (5 min timeout) ──
     const formData = new FormData();
     formData.append('audio', selectedFile);
 
@@ -787,13 +784,12 @@ btnProtect.addEventListener('click', async ()=>{
         if(err.name === 'AbortError'){
             errorMsg = 'Request timed out (5 min). Try a shorter audio file.';
         } else {
-            errorMsg = 'Cannot connect to server. Please try again.';
+            errorMsg = `Cannot connect to ${API_BASE} — check your backend URL.`;
         }
     }
 
     clearInterval(tick);
 
-    // ── Error ──
     if(errorMsg){
         progressBar.style.width = '100%';
         progressBar.style.background = 'linear-gradient(90deg,#ff5c5c,#ff8a80)';
@@ -813,7 +809,6 @@ btnProtect.addEventListener('click', async ()=>{
         return;
     }
 
-    // ── Success ──
     progressBar.style.width = '100%';
     progressPct.textContent = '100%';
     statusMsg.textContent   = 'Protection complete ✓';
@@ -857,7 +852,6 @@ btnReset.addEventListener('click', ()=>{
     originalDur.textContent = protectedDur.textContent = '—';
 });
 
-// Scroll animation
 const observer = new IntersectionObserver(entries=>{
     entries.forEach(e=>{ if(e.isIntersecting) e.target.style.animationPlayState='running'; });
 },{ threshold:.1 });
