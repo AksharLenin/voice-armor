@@ -495,7 +495,7 @@
 // It is a SEPARATE service from this frontend.
 // Go to render.com → your backend service → copy the URL shown at the top.
 // Example: 'https://vocal-armor-api.onrender.com'
-const API_BASE        = 'https://voice-armor.onrender.com';  // <-- UPDATE THIS
+const API_BASE        = 'https://voice-armor.onrender.com';
 const HEALTH_URL      = `${API_BASE}/health`;
 const PROTECT_URL     = `${API_BASE}/protect-voice`;
 
@@ -654,20 +654,33 @@ function startKeepAlive(){
         serverAwake=true;
         setNavStatus('online');
         startKeepAlive();
-        configBanner.classList.remove('show');
-    } else {
-        // After 8s timeout, could be wrong URL or truly sleeping
-        // Try once more quickly to distinguish
-        const alive2 = await checkHealth();
-        if(alive2){
-            serverAwake=true; setNavStatus('online'); startKeepAlive();
-        } else {
-            // Show config banner with the URL being tried
+        return;
+    }
+    // Server sleeping — show wake banner and keep polling for up to 3 min
+    setNavStatus('waking');
+    showWakeBanner(0);
+    startCountdown();
+    let elapsed = 0;
+    const poll = setInterval(async ()=>{
+        elapsed += WAKE_POLL_MS / 1000;
+        const ok = await checkHealth();
+        if(ok){
+            clearInterval(poll);
+            stopCountdown();
+            serverAwake = true;
+            setNavStatus('online');
+            hideWakeBanner();
+            configBanner.classList.remove('show');
+            startKeepAlive();
+        } else if(elapsed >= 180){
+            clearInterval(poll);
+            stopCountdown();
+            hideWakeBanner();
             configUrl.textContent = API_BASE;
             configBanner.classList.add('show');
             setNavStatus('offline');
         }
-    }
+    }, WAKE_POLL_MS);
 })();
 
 // ─── File handling ────────────────────────────────────────
