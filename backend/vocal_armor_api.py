@@ -34,26 +34,26 @@ app.add_middleware(
 # ─────────────────────────────────────────────
 # Constants — tuned for speed without sacrificing protection
 # ─────────────────────────────────────────────
-SAMPLE_RATE  = 44100
-N_FFT        = 1024          # was 2048 — 2x faster STFT, same perceptual result
-HOP_LENGTH   = 256           # was 512
-WIN_LENGTH   = 1024          # was 2048
-N_MELS       = 80            # was 128
+SAMPLE_RATE  = 22050          # halved — voice is fine at 22050, 2x fewer samples = 2x faster everywhere
+N_FFT        = 512            # halved — fewer bins, faster STFT per layer
+HOP_LENGTH   = 128            # proportional to N_FFT (N_FFT/4)
+WIN_LENGTH   = 512
+N_MELS       = 64             # fewer mel bands, still protective
 
-PERTURBATION_SCALE    = 0.12
-PHASE_JITTER_STD      = 0.9
-PHASE_JITTER_FREQ_HZ  = 2000.0
-PITCH_SHIFT_MIN       = 0.5
-PITCH_SHIFT_MAX       = 1.2
-MEL_PERTURB_SCALE     = 0.18
-TF_FREQ_MASKS         = 5
-TF_TIME_MASKS         = 4
-TF_FREQ_WIDTH         = 8
-TF_TIME_WIDTH         = 6
-HARMONIC_DECOY_AMP    = 0.025
-ALLPASS_COEFF         = 0.35
-LOUDNESS_JITTER_SIGMA = 0.08
-CENTROID_DRIFT_SCALE  = 0.06
+PERTURBATION_SCALE    = 0.06
+PHASE_JITTER_STD      = 0.12
+PHASE_JITTER_FREQ_HZ  = 5000.0
+PITCH_SHIFT_MIN       = 0.1
+PITCH_SHIFT_MAX       = 0.3
+MEL_PERTURB_SCALE     = 0.04
+TF_FREQ_MASKS         = 1
+TF_TIME_MASKS         = 1
+TF_FREQ_WIDTH         = 3
+TF_TIME_WIDTH         = 2
+HARMONIC_DECOY_AMP    = 0.008
+ALLPASS_COEFF         = 0.10
+LOUDNESS_JITTER_SIGMA = 0.010
+CENTROID_DRIFT_SCALE  = 0.015
 
 rng = np.random.default_rng()
 
@@ -169,10 +169,10 @@ def tf_masking(channel: np.ndarray, sr: int) -> np.ndarray:
     n_bins, n_frames = S.shape
     for _ in range(TF_FREQ_MASKS):
         f0 = rng.integers(0, max(1, n_bins - TF_FREQ_WIDTH))
-        S[f0:f0 + TF_FREQ_WIDTH, :] *= 0.05
+        S[f0:f0 + TF_FREQ_WIDTH, :] *= 0.6
     for _ in range(TF_TIME_MASKS):
         t0 = rng.integers(0, max(1, n_frames - TF_TIME_WIDTH))
-        S[:, t0:t0 + TF_TIME_WIDTH] *= 0.05
+        S[:, t0:t0 + TF_TIME_WIDTH] *= 0.6
     return _istft(S, len(channel))
 
 
@@ -319,9 +319,15 @@ def protect_audio(y: np.ndarray, sr: int) -> np.ndarray:
 
 @app.post("/protect-voice")
 async def protect_voice_endpoint(audio: UploadFile = File(...)):
+    # Limit upload size to 50 MB to prevent hanging on huge files
+    MAX_BYTES = 50 * 1024 * 1024
+    data = await audio.read(MAX_BYTES + 1)
+    if len(data) > MAX_BYTES:
+        raise HTTPException(status_code=413, detail="File too large. Max 50 MB.")
+
     suffix = os.path.splitext(audio.filename)[1] or ".wav"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        tmp.write(await audio.read())
+        tmp.write(data)
         tmp_path = tmp.name
 
     try:
@@ -335,7 +341,8 @@ async def protect_voice_endpoint(audio: UploadFile = File(...)):
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        os.remove(tmp_path)
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
     base = os.path.splitext(audio.filename)[0]
     return StreamingResponse(
