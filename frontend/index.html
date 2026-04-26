@@ -38,17 +38,8 @@
             --radius-xs: 8px;
         }
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
 
         body {
             background: var(--bg);
@@ -64,651 +55,280 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        #particleCanvas {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-        }
+        #particleCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
         .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
+            position: fixed; border-radius: 50%; filter: blur(80px);
+            pointer-events: none; z-index: 0;
             animation: orbFloat 20s ease-in-out infinite;
         }
-
-        .orb-1 {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(0, 212, 170, 0.07) 0%, transparent 70%);
-            top: -150px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-
-        .orb-2 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(0, 170, 255, 0.05) 0%, transparent 70%);
-            bottom: -100px;
-            right: -100px;
-            animation-delay: -7s;
-        }
-
-        .orb-3 {
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(120, 0, 255, 0.04) 0%, transparent 70%);
-            top: 40%;
-            left: 60%;
-            animation-delay: -14s;
-        }
+        .orb-1 { width:500px;height:500px;background:radial-gradient(circle,rgba(0,212,170,.07) 0%,transparent 70%);top:-150px;left:-100px;animation-delay:0s; }
+        .orb-2 { width:400px;height:400px;background:radial-gradient(circle,rgba(0,170,255,.05) 0%,transparent 70%);bottom:-100px;right:-100px;animation-delay:-7s; }
+        .orb-3 { width:300px;height:300px;background:radial-gradient(circle,rgba(120,0,255,.04) 0%,transparent 70%);top:40%;left:60%;animation-delay:-14s; }
 
         @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(30px, -20px) scale(1.05); }
-            50% { transform: translate(-20px, 30px) scale(0.95); }
-            75% { transform: translate(20px, 20px) scale(1.02); }
+            0%,100% { transform:translate(0,0) scale(1); }
+            25% { transform:translate(30px,-20px) scale(1.05); }
+            50% { transform:translate(-20px,30px) scale(.95); }
+            75% { transform:translate(20px,20px) scale(1.02); }
         }
 
         .top-nav {
-            position: sticky;
-            top: 0;
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 18px 0;
-            z-index: 100;
-            animation: fadeDown 0.6s ease both;
+            position:sticky;top:0;width:100%;max-width:900px;
+            display:flex;align-items:center;justify-content:space-between;
+            padding:18px 0;z-index:100;animation:fadeDown .6s ease both;
         }
+        .nav-brand { display:flex;align-items:center;gap:10px;text-decoration:none; }
+        .nav-brand svg { width:30px;height:30px; }
+        .nav-brand-text { font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:-.02em; }
+        .nav-brand-text em { font-style:normal;color:var(--accent); }
+        .nav-status { display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em; }
+        .nav-status .pulse-dot { width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s ease-in-out infinite;box-shadow:0 0 8px var(--accent-glow); }
+        .nav-status .pulse-dot.warning { background:var(--warning);box-shadow:0 0 8px rgba(255,179,71,.4); }
+        .nav-status .pulse-dot.danger  { background:var(--danger);box-shadow:0 0 8px rgba(255,92,92,.4); }
 
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
+        /* Server status banner */
+        .server-banner {
+            display:none;width:100%;max-width:600px;
+            background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.25);
+            border-radius:var(--radius-sm);padding:12px 18px;margin-bottom:16px;
+            font-size:12px;color:var(--warning);
+            align-items:center;gap:10px;z-index:1;position:relative;
+            animation:fadeUp .3s ease both;
         }
-
-        .nav-brand svg { width: 30px; height: 30px; }
-
-        .nav-brand-text {
-            font-family: 'Syne', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: -0.02em;
-        }
-
-        .nav-brand-text em { font-style: normal; color: var(--accent); }
-
-        .nav-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            color: var(--muted);
-            font-family: 'DM Mono', monospace;
-            letter-spacing: 0.04em;
-        }
-
-        .nav-status .pulse-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-            box-shadow: 0 0 8px var(--accent-glow);
-        }
+        .server-banner.show { display:flex; }
+        .server-banner svg { width:16px;height:16px;stroke:var(--warning);flex-shrink:0; }
+        .server-banner .banner-text { flex:1;line-height:1.5; }
+        .server-banner .countdown { font-family:'DM Mono',monospace;font-size:11px;color:var(--warning);opacity:.7; }
 
         .hero {
-            text-align: center;
-            padding: 60px 0 50px;
-            max-width: 700px;
-            position: relative;
-            z-index: 1;
-            animation: fadeUp 0.8s ease both;
+            text-align:center;padding:60px 0 50px;max-width:700px;
+            position:relative;z-index:1;animation:fadeUp .8s ease both;
         }
-
         .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--accent-dim);
-            border: 1px solid var(--border-accent);
-            border-radius: 100px;
-            padding: 6px 16px;
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--accent);
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-bottom: 24px;
-            backdrop-filter: blur(10px);
+            display:inline-flex;align-items:center;gap:8px;
+            background:var(--accent-dim);border:1px solid var(--border-accent);
+            border-radius:100px;padding:6px 16px;font-size:11px;font-weight:500;
+            color:var(--accent);letter-spacing:.06em;text-transform:uppercase;
+            margin-bottom:24px;backdrop-filter:blur(10px);
         }
-
-        .hero-badge svg { width: 14px; height: 14px; stroke: var(--accent); }
-
+        .hero-badge svg { width:14px;height:14px;stroke:var(--accent); }
         .hero h1 {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(36px, 6vw, 56px);
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-            color: var(--text-bright);
-            margin-bottom: 18px;
+            font-family:'Syne',sans-serif;font-size:clamp(36px,6vw,56px);
+            font-weight:800;letter-spacing:-.03em;line-height:1.1;
+            color:var(--text-bright);margin-bottom:18px;
         }
-
         .hero h1 .gradient-text {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, #00aaff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 50%,#00aaff 100%);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
         }
+        .hero-sub { font-size:16px;line-height:1.7;color:var(--muted);max-width:480px;margin:0 auto;font-weight:400; }
 
-        .hero-sub {
-            font-size: 16px;
-            line-height: 1.7;
-            color: var(--muted);
-            max-width: 480px;
-            margin: 0 auto;
-            font-weight: 400;
-        }
-
-        .feature-pills {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 30px;
-            animation: fadeUp 0.8s 0.2s ease both;
-        }
-
+        .feature-pills { display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:30px;animation:fadeUp .8s .2s ease both; }
         .pill {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(12px);
-            border-radius: 100px;
-            padding: 8px 16px;
-            font-size: 12px;
-            color: var(--text);
-            font-weight: 500;
-            transition: all 0.3s ease;
+            display:flex;align-items:center;gap:6px;background:var(--surface2);
+            border:1px solid var(--border);backdrop-filter:blur(12px);
+            border-radius:100px;padding:8px 16px;font-size:12px;color:var(--text);
+            font-weight:500;transition:all .3s ease;
         }
+        .pill:hover { border-color:var(--border-accent);background:var(--accent-dim);transform:translateY(-1px); }
+        .pill svg { width:14px;height:14px;stroke:var(--accent);flex-shrink:0; }
 
-        .pill:hover {
-            border-color: var(--border-accent);
-            background: var(--accent-dim);
-            transform: translateY(-1px);
-        }
-
-        .pill svg { width: 14px; height: 14px; stroke: var(--accent); flex-shrink: 0; }
-
-        .main-content {
-            width: 100%;
-            max-width: 600px;
-            position: relative;
-            z-index: 1;
-        }
+        .main-content { width:100%;max-width:600px;position:relative;z-index:1; }
 
         .card {
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            animation: fadeUp 0.6s 0.15s ease both;
-            box-shadow:
-                0 0 0 1px rgba(255, 255, 255, 0.03),
-                0 4px 24px rgba(0, 0, 0, 0.3),
-                0 12px 48px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.04);
-            position: relative;
+            background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
+            animation:fadeUp .6s .15s ease both;
+            box-shadow:0 0 0 1px rgba(255,255,255,.03),0 4px 24px rgba(0,0,0,.3),0 12px 48px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.04);
+            position:relative;
         }
-
         .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent-glow2), transparent);
+            content:'';position:absolute;top:0;left:0;right:0;height:1px;
+            background:linear-gradient(90deg,transparent,var(--accent-glow2),transparent);
         }
-
-        .card-body { padding: 32px; }
+        .card-body { padding:32px; }
 
         .section-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+            color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;
         }
-
-        .section-label::before {
-            content: '';
-            width: 12px;
-            height: 2px;
-            background: var(--accent);
-            border-radius: 1px;
-        }
+        .section-label::before { content:'';width:12px;height:2px;background:var(--accent);border-radius:1px; }
 
         .drop-zone {
-            border: 1.5px dashed var(--border2);
-            border-radius: var(--radius-sm);
-            padding: 48px 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            background: rgba(0, 0, 0, 0.15);
+            border:1.5px dashed var(--border2);border-radius:var(--radius-sm);
+            padding:48px 24px;text-align:center;cursor:pointer;
+            transition:all .3s ease;position:relative;background:rgba(0,0,0,.15);
         }
-
         .drop-zone::before {
-            content: '';
-            position: absolute;
-            inset: -1px;
-            border-radius: var(--radius-sm);
-            background: linear-gradient(135deg, var(--accent-glow2), transparent, var(--accent-glow2));
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            z-index: -1;
+            content:'';position:absolute;inset:-1px;border-radius:var(--radius-sm);
+            background:linear-gradient(135deg,var(--accent-glow2),transparent,var(--accent-glow2));
+            opacity:0;transition:opacity .4s ease;z-index:-1;
         }
-
-        .drop-zone:hover, .drop-zone.drag-over {
-            border-color: var(--accent);
-            background: var(--accent-dim);
-            transform: scale(1.005);
-        }
-
-        .drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
-
-        .drop-zone input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-        }
+        .drop-zone:hover,.drop-zone.drag-over { border-color:var(--accent);background:var(--accent-dim);transform:scale(1.005); }
+        .drop-zone:hover::before,.drop-zone.drag-over::before { opacity:1; }
+        .drop-zone input[type="file"] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2; }
 
         .drop-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 18px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--surface3), var(--surface2));
-            border: 1px solid var(--border2);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            animation: breathe 4s ease-in-out infinite;
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto 18px;width:56px;height:56px;border-radius:50%;
+            background:linear-gradient(135deg,var(--surface3),var(--surface2));
+            border:1px solid var(--border2);
+            box-shadow:0 4px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.05);
+            animation:breathe 4s ease-in-out infinite;
         }
+        .drop-icon svg { width:24px;height:24px;stroke:var(--accent);filter:drop-shadow(0 0 4px var(--accent-glow)); }
+        .drop-title { font-family:'Syne',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px; }
+        .drop-sub { font-size:13px;color:var(--muted); }
+        .drop-sub strong { color:var(--accent);font-weight:500; }
 
-        .drop-icon svg {
-            width: 24px;
-            height: 24px;
-            stroke: var(--accent);
-            filter: drop-shadow(0 0 4px var(--accent-glow));
-        }
+        .waveform-wrap { display:none;margin-top:16px;padding:16px;background:rgba(0,0,0,.2);border-radius:var(--radius-xs);border:1px solid var(--border); }
+        .waveform-wrap.show { display:block;animation:fadeUp .3s ease both; }
+        #waveformCanvas { width:100%;height:48px;display:block;border-radius:4px; }
 
-        .drop-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
+        .file-info { display:none;align-items:center;gap:12px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius-xs);padding:14px 18px;margin-top:14px; }
+        .file-info.show { display:flex;animation:fadeUp .3s ease both; }
+        .file-info svg { width:20px;height:20px;stroke:var(--accent);flex-shrink:0; }
+        .file-name { font-size:13px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500; }
+        .file-size { font-size:11px;color:var(--muted);font-family:'DM Mono',monospace; }
 
-        .drop-sub { font-size: 13px; color: var(--muted); }
-        .drop-sub strong { color: var(--accent); font-weight: 500; }
+        .divider { height:1px;background:var(--border);margin:0; }
 
-        .waveform-wrap {
-            display: none;
-            margin-top: 16px;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: var(--radius-xs);
-            border: 1px solid var(--border);
-        }
-
-        .waveform-wrap.show { display: block; animation: fadeUp 0.3s ease both; }
-
-        #waveformCanvas { width: 100%; height: 48px; display: block; border-radius: 4px; }
-
-        .file-info {
-            display: none;
-            align-items: center;
-            gap: 12px;
-            background: var(--accent-dim);
-            border: 1px solid var(--border-accent);
-            border-radius: var(--radius-xs);
-            padding: 14px 18px;
-            margin-top: 14px;
-        }
-
-        .file-info.show { display: flex; animation: fadeUp 0.3s ease both; }
-        .file-info svg { width: 20px; height: 20px; stroke: var(--accent); flex-shrink: 0; }
-
-        .file-name {
-            font-size: 13px;
-            color: var(--text);
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 500;
-        }
-
-        .file-size { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
-        .divider { height: 1px; background: var(--border); margin: 0; }
-
-        .action-wrap { padding: 0 32px 28px; }
-
+        .action-wrap { padding:0 32px 28px; }
         .btn-protect {
-            width: 100%;
-            padding: 16px;
-            border-radius: var(--radius-sm);
-            border: none;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: #020d0a;
-            font-family: 'Syne', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 20px var(--accent-glow), 0 0 0 1px rgba(0, 212, 170, 0.2);
+            width:100%;padding:16px;border-radius:var(--radius-sm);border:none;
+            background:linear-gradient(135deg,var(--accent),var(--accent2));
+            color:#020d0a;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+            letter-spacing:.02em;cursor:pointer;transition:all .25s ease;
+            position:relative;overflow:hidden;
+            box-shadow:0 4px 20px var(--accent-glow),0 0 0 1px rgba(0,212,170,.2);
         }
-
         .btn-protect::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.15) 50%, transparent 60%);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
+            content:'';position:absolute;inset:0;
+            background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);
+            transform:translateX(-100%);transition:transform .6s ease;
+        }
+        .btn-protect:not(:disabled):hover::after { transform:translateX(100%); }
+        .btn-protect:disabled { background:var(--surface3);color:var(--muted);cursor:not-allowed;border:1px solid var(--border);box-shadow:none; }
+        .btn-protect:not(:disabled):hover { box-shadow:0 6px 30px var(--accent-glow),0 0 0 1px rgba(0,212,170,.3);transform:translateY(-1px); }
+        .btn-protect:not(:disabled):active { transform:scale(.985) translateY(0); }
+
+        /* Wake-up state for button */
+        .btn-protect.waking {
+            background:linear-gradient(135deg,#8a6a00,var(--warning)) !important;
+            color:#1a1200 !important;
+            box-shadow:0 4px 20px rgba(255,179,71,.3),0 0 0 1px rgba(255,179,71,.2) !important;
         }
 
-        .btn-protect:not(:disabled):hover::after { transform: translateX(100%); }
-
-        .btn-protect:disabled {
-            background: var(--surface3);
-            color: var(--muted);
-            cursor: not-allowed;
-            border: 1px solid var(--border);
-            box-shadow: none;
-        }
-
-        .btn-protect:disabled::after { display: none; }
-
-        .btn-protect:not(:disabled):hover {
-            box-shadow: 0 6px 30px var(--accent-glow), 0 0 0 1px rgba(0, 212, 170, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .btn-protect:not(:disabled):active { transform: scale(0.985) translateY(0); }
-
-        .progress-wrap { display: none; padding: 0 32px 24px; }
-        .progress-wrap.show { display: block; animation: fadeUp 0.3s ease both; }
-
-        .progress-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .status-msg { font-size: 12px; color: var(--accent); letter-spacing: 0.04em; font-weight: 500; }
-        .progress-pct { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
-        .progress-track { height: 4px; background: rgba(0, 0, 0, 0.3); border-radius: 4px; overflow: hidden; }
-
+        .progress-wrap { display:none;padding:0 32px 24px; }
+        .progress-wrap.show { display:block;animation:fadeUp .3s ease both; }
+        .progress-status { display:flex;justify-content:space-between;align-items:center;margin-bottom:10px; }
+        .status-msg { font-size:12px;color:var(--accent);letter-spacing:.04em;font-weight:500; }
+        .status-msg.warning { color:var(--warning); }
+        .progress-pct { font-size:12px;color:var(--muted);font-family:'DM Mono',monospace; }
+        .progress-track { height:4px;background:rgba(0,0,0,.3);border-radius:4px;overflow:hidden; }
         .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--accent2));
-            border-radius: 4px;
-            width: 0%;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 12px var(--accent-glow);
-            position: relative;
+            height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+            border-radius:4px;width:0%;transition:width .3s ease;
+            box-shadow:0 0 12px var(--accent-glow);position:relative;
         }
-
         .progress-bar::after {
-            content: '';
-            position: absolute;
-            right: 0; top: -2px;
-            width: 8px; height: 8px;
-            background: var(--accent);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-glow);
+            content:'';position:absolute;right:0;top:-2px;width:8px;height:8px;
+            background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--accent-glow);
+        }
+        .progress-bar.warning-bar {
+            background:linear-gradient(90deg,#8a6a00,var(--warning));
+            box-shadow:0 0 12px rgba(255,179,71,.4);
+        }
+        .progress-bar.warning-bar::after { background:var(--warning);box-shadow:0 0 10px rgba(255,179,71,.4); }
+
+        /* Pulse animation for waking state */
+        @keyframes indeterminate {
+            0%   { transform:translateX(-100%); }
+            100% { transform:translateX(400%); }
+        }
+        .progress-bar.indeterminate {
+            width:25% !important;
+            animation:indeterminate 1.4s ease-in-out infinite;
         }
 
-        .output-wrap { display: none; padding: 0 32px 28px; }
-        .output-wrap.show { display: block; animation: fadeUp 0.4s ease both; }
-
-        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
-
-        .audio-card {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .audio-card:hover { border-color: var(--border2); background: rgba(0, 0, 0, 0.25); }
-        .audio-card.accent-border { border-color: var(--border-accent); background: var(--accent-dim); }
-
-        .audio-card-label { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-
-        .audio-card-label span {
-            font-size: 10px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        .audio-card-label .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .dot-original { background: var(--muted); }
-        .dot-protected { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); animation: pulse 2s ease-in-out infinite; }
-
-        audio { width: 100%; height: 34px; border-radius: 4px; }
-        .audio-dur { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: right; font-family: 'DM Mono', monospace; }
+        .output-wrap { display:none;padding:0 32px 28px; }
+        .output-wrap.show { display:block;animation:fadeUp .4s ease both; }
+        .compare-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
+        .audio-card { background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;transition:all .3s ease; }
+        .audio-card:hover { border-color:var(--border2);background:rgba(0,0,0,.25); }
+        .audio-card.accent-border { border-color:var(--border-accent);background:var(--accent-dim); }
+        .audio-card-label { display:flex;align-items:center;gap:8px;margin-bottom:12px; }
+        .audio-card-label span { font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600; }
+        .audio-card-label .dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+        .dot-original { background:var(--muted); }
+        .dot-protected { background:var(--accent);box-shadow:0 0 8px var(--accent-glow);animation:pulse 2s ease-in-out infinite; }
+        audio { width:100%;height:34px;border-radius:4px; }
+        .audio-dur { font-size:11px;color:var(--muted);margin-top:8px;text-align:right;font-family:'DM Mono',monospace; }
 
         .btn-download {
-            width: 100%;
-            padding: 14px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--accent);
-            background: transparent;
-            color: var(--accent);
-            font-family: 'Syne', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            letter-spacing: 0.02em;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
+            width:100%;padding:14px;border-radius:var(--radius-sm);
+            border:1px solid var(--accent);background:transparent;color:var(--accent);
+            font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;
+            letter-spacing:.02em;transition:all .3s ease;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            position:relative;overflow:hidden;
         }
+        .btn-download::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-dim),transparent);opacity:0;transition:opacity .3s ease; }
+        .btn-download:hover { border-color:var(--accent2);box-shadow:0 4px 20px var(--accent-glow);transform:translateY(-1px); }
+        .btn-download:hover::before { opacity:1; }
+        .btn-download svg { width:16px;height:16px;stroke:var(--accent);position:relative;z-index:1; }
+        .btn-download span { position:relative;z-index:1; }
 
-        .btn-download::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, var(--accent-dim), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+        .trust-bar { display:flex;align-items:center;gap:10px;padding:16px 32px;border-top:1px solid var(--border); }
+        .trust-bar svg { width:14px;height:14px;stroke:var(--muted);flex-shrink:0; }
+        .trust-bar span { font-size:11px;color:var(--muted);letter-spacing:.02em; }
+        .reset-btn { background:none;border:1px solid var(--border2);color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;margin-left:auto;padding:5px 12px;border-radius:100px;transition:all .2s ease; }
+        .reset-btn:hover { color:var(--text);border-color:var(--muted); }
 
-        .btn-download:hover { border-color: var(--accent2); box-shadow: 0 4px 20px var(--accent-glow); transform: translateY(-1px); }
-        .btn-download:hover::before { opacity: 1; }
-        .btn-download svg { width: 16px; height: 16px; stroke: var(--accent); position: relative; z-index: 1; }
-        .btn-download span { position: relative; z-index: 1; }
-
-        .trust-bar { display: flex; align-items: center; gap: 10px; padding: 16px 32px; border-top: 1px solid var(--border); }
-        .trust-bar svg { width: 14px; height: 14px; stroke: var(--muted); flex-shrink: 0; }
-        .trust-bar span { font-size: 11px; color: var(--muted); letter-spacing: 0.02em; }
-
-        .reset-btn {
-            background: none;
-            border: 1px solid var(--border2);
-            color: var(--muted);
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            cursor: pointer;
-            margin-left: auto;
-            padding: 5px 12px;
-            border-radius: 100px;
-            transition: all 0.2s ease;
-        }
-
-        .reset-btn:hover { color: var(--text); border-color: var(--muted); }
-
-        .how-section {
-            margin-top: 48px;
-            width: 100%;
-            max-width: 600px;
-            position: relative;
-            z-index: 1;
-            animation: fadeUp 0.6s 0.3s ease both;
-        }
-
-        .how-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--text-bright);
-            text-align: center;
-            margin-bottom: 28px;
-            letter-spacing: -0.02em;
-        }
-
-        .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-
+        .how-section { margin-top:48px;width:100%;max-width:600px;position:relative;z-index:1;animation:fadeUp .6s .3s ease both; }
+        .how-title { font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text-bright);text-align:center;margin-bottom:28px;letter-spacing:-.02em; }
+        .how-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
         .how-card {
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 24px 18px;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);
+            border-radius:var(--radius-sm);padding:24px 18px;text-align:center;
+            transition:all .3s ease;position:relative;overflow:hidden;
         }
+        .how-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s ease; }
+        .how-card:hover { border-color:var(--border-accent);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3); }
+        .how-card:hover::before { opacity:1; }
+        .how-step { display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--border-accent);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent);margin-bottom:14px; }
+        .how-card h3 { font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px; }
+        .how-card p { font-size:12px;color:var(--muted);line-height:1.6; }
 
-        .how-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+        .bottom-note { text-align:center;margin-top:48px;padding:20px;position:relative;z-index:1;animation:fadeUp .6s .4s ease both; }
+        .bottom-note p { font-size:11px;color:var(--muted2);letter-spacing:.04em; }
+        .bottom-note a { color:var(--muted);text-decoration:none;transition:color .2s; }
+        .bottom-note a:hover { color:var(--accent); }
 
-        .how-card:hover { border-color: var(--border-accent); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
-        .how-card:hover::before { opacity: 1; }
-
-        .how-step {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            background: var(--accent-dim);
-            border: 1px solid var(--border-accent);
-            font-family: 'Syne', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 14px;
-        }
-
-        .how-card h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-        .how-card p { font-size: 12px; color: var(--muted); line-height: 1.6; }
-
-        .bottom-note { text-align: center; margin-top: 48px; padding: 20px; position: relative; z-index: 1; animation: fadeUp 0.6s 0.4s ease both; }
-        .bottom-note p { font-size: 11px; color: var(--muted2); letter-spacing: 0.04em; }
-        .bottom-note a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
-        .bottom-note a:hover { color: var(--accent); }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(18px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
+        @keyframes fadeUp { from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.5} }
         @keyframes breathe {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
-            50% { transform: scale(1.04); box-shadow: 0 4px 24px rgba(0, 212, 170, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+            0%,100%{transform:scale(1);box-shadow:0 4px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.05)}
+            50%{transform:scale(1.04);box-shadow:0 4px 24px rgba(0,212,170,.1),inset 0 1px 0 rgba(255,255,255,.05)}
         }
 
-        .wave-bars { display: none; align-items: center; justify-content: center; gap: 3px; height: 22px; }
-        .wave-bars.show { display: flex; }
+        .wave-bars { display:none;align-items:center;justify-content:center;gap:3px;height:22px; }
+        .wave-bars.show { display:flex; }
+        .wave-bar { width:3px;background:#020d0a;border-radius:2px;animation:wavePulse 1.2s ease-in-out infinite; }
+        .wave-bar:nth-child(1){animation-delay:0s}.wave-bar:nth-child(2){animation-delay:.12s}.wave-bar:nth-child(3){animation-delay:.24s}.wave-bar:nth-child(4){animation-delay:.36s}.wave-bar:nth-child(5){animation-delay:.48s}
+        @keyframes wavePulse { 0%,100%{height:6px;opacity:.5}50%{height:18px;opacity:1} }
 
-        .wave-bar { width: 3px; background: #020d0a; border-radius: 2px; animation: wavePulse 1.2s ease-in-out infinite; }
-        .wave-bar:nth-child(1) { animation-delay: 0s; }
-        .wave-bar:nth-child(2) { animation-delay: 0.12s; }
-        .wave-bar:nth-child(3) { animation-delay: 0.24s; }
-        .wave-bar:nth-child(4) { animation-delay: 0.36s; }
-        .wave-bar:nth-child(5) { animation-delay: 0.48s; }
+        .shield-glow { animation:shieldPulse 3s ease-in-out infinite; }
+        @keyframes shieldPulse { 0%,100%{filter:drop-shadow(0 0 2px var(--accent-glow))}50%{filter:drop-shadow(0 0 8px var(--accent-glow))} }
 
-        @keyframes wavePulse {
-            0%, 100% { height: 6px; opacity: 0.5; }
-            50% { height: 18px; opacity: 1; }
-        }
-
-        .shield-glow { animation: shieldPulse 3s ease-in-out infinite; }
-
-        @keyframes shieldPulse {
-            0%, 100% { filter: drop-shadow(0 0 2px var(--accent-glow)); }
-            50% { filter: drop-shadow(0 0 8px var(--accent-glow)); }
-        }
-
-        @media (max-width: 640px) {
-            .hero { padding: 40px 0 36px; }
-            .hero h1 { font-size: 30px; }
-            .compare-grid { grid-template-columns: 1fr; }
-            .how-grid { grid-template-columns: 1fr; gap: 12px; }
-            .feature-pills { gap: 8px; }
-            .card-body { padding: 24px; }
-            .action-wrap { padding: 0 24px 24px; }
-            .progress-wrap { padding: 0 24px 20px; }
-            .output-wrap { padding: 0 24px 24px; }
-            .trust-bar { padding: 14px 24px; }
+        @media(max-width:640px){
+            .hero{padding:40px 0 36px}.hero h1{font-size:30px}
+            .compare-grid{grid-template-columns:1fr}.how-grid{grid-template-columns:1fr;gap:12px}
+            .feature-pills{gap:8px}.card-body{padding:24px}.control-row{padding:20px 24px}
+            .action-wrap{padding:0 24px 24px}.progress-wrap{padding:0 24px 20px}
+            .output-wrap{padding:0 24px 24px}.trust-bar{padding:14px 24px}
         }
     </style>
 </head>
@@ -723,49 +343,44 @@
     <nav class="top-nav" id="topNav">
         <a class="nav-brand" href="#">
             <svg viewBox="0 0 36 36" fill="none" class="shield-glow">
-                <path d="M18 3L6 8.5v8.5c0 7.18 5.14 13.9 12 15.5C24.86 30.9 30 24.18 30 17V8.5L18 3z"
-                    fill="rgba(0,212,170,0.12)" stroke="#00d4aa" stroke-width="1.5" />
-                <path d="M13 18l3.5 3.5 6.5-7" stroke="#00d4aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M18 3L6 8.5v8.5c0 7.18 5.14 13.9 12 15.5C24.86 30.9 30 24.18 30 17V8.5L18 3z" fill="rgba(0,212,170,0.12)" stroke="#00d4aa" stroke-width="1.5"/>
+                <path d="M13 18l3.5 3.5 6.5-7" stroke="#00d4aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span class="nav-brand-text">Vocal<em>Armor</em></span>
         </a>
-        <div class="nav-status">
-            <div class="pulse-dot"></div>
-            <span>System Active</span>
+        <div class="nav-status" id="navStatus">
+            <div class="pulse-dot" id="statusDot"></div>
+            <span id="statusText">Checking server…</span>
         </div>
     </nav>
 
+    <!-- Server wake-up banner -->
+    <div class="server-banner" id="serverBanner">
+        <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="banner-text" id="bannerText">Server is waking up from sleep — this takes about 30–60 seconds on first use. Your file will be processed automatically once it's ready.</span>
+        <span class="countdown" id="bannerCountdown"></span>
+    </div>
+
     <section class="hero" id="hero">
         <div class="hero-badge">
-            <svg viewBox="0 0 24 24" fill="none">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-width="1.5" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-width="1.5"/></svg>
             Adversarial AI Defense
         </div>
         <h1>Protect Your Voice<br>From <span class="gradient-text">AI Cloning</span></h1>
-        <p class="hero-sub">
-            Add imperceptible perturbations to your audio that fool AI voice cloning models — while keeping your voice
-            sounding natural to human ears.
-        </p>
+        <p class="hero-sub">Add imperceptible perturbations to your audio that fool AI voice cloning models — while keeping your voice sounding natural to human ears.</p>
         <div class="feature-pills">
             <div class="pill">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke-width="1.5" />
-                    <path d="m9 12 2 2 4-4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke-width="1.5"/><path d="m9 12 2 2 4-4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Imperceptible Changes
             </div>
             <div class="pill">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                Real-time Processing
+                <svg viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                5-Layer Protection
             </div>
             <div class="pill">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="3" y="11" width="18" height="11" rx="2" stroke-width="1.5" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-width="1.5" stroke-linecap="round" />
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke-width="1.5"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-width="1.5" stroke-linecap="round"/></svg>
                 End-to-End Private
             </div>
         </div>
@@ -779,9 +394,7 @@
                 <div class="drop-zone" id="dropZone">
                     <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.m4a,.ogg,.flac,.aac">
                     <div class="drop-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 12h2M6 6v12M10 9v6M14 4v16M18 8v8M22 12h-2" stroke-linecap="round" stroke-width="1.5" />
-                        </svg>
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M2 12h2M6 6v12M10 9v6M14 4v16M18 8v8M22 12h-2" stroke-linecap="round" stroke-width="1.5"/></svg>
                     </div>
                     <div class="drop-title">Drop your audio file here</div>
                     <div class="drop-sub">or click to browse · <strong>.wav</strong> and <strong>.mp3</strong> supported</div>
@@ -792,27 +405,20 @@
                 </div>
 
                 <div class="file-info" id="fileInfo">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 18V5l12-2v13" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
-                        <circle cx="6" cy="18" r="3" stroke-width="1.5" />
-                        <circle cx="18" cy="16" r="3" stroke-width="1.5" />
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M9 18V5l12-2v13" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/><circle cx="6" cy="18" r="3" stroke-width="1.5"/><circle cx="18" cy="16" r="3" stroke-width="1.5"/></svg>
                     <span class="file-name" id="fileName">—</span>
                     <span class="file-size" id="fileSize">—</span>
                 </div>
             </div>
 
             <div class="divider"></div>
-            <div class="divider"></div>
 
-            <div class="action-wrap" style="padding-top: 24px;">
+            <div class="action-wrap" style="padding-top:24px;">
                 <button class="btn-protect" id="btnProtect" disabled>
                     <span id="btnLabel">Protect My Voice</span>
                     <div class="wave-bars" id="waveBars">
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div>
                         <div class="wave-bar"></div>
                     </div>
                 </button>
@@ -832,415 +438,430 @@
                 <div class="section-label" style="margin-bottom:14px;">Compare Audio</div>
                 <div class="compare-grid">
                     <div class="audio-card">
-                        <div class="audio-card-label">
-                            <div class="dot dot-original"></div>
-                            <span>Original</span>
-                        </div>
+                        <div class="audio-card-label"><div class="dot dot-original"></div><span>Original</span></div>
                         <audio controls id="originalPlayer"></audio>
                         <div class="audio-dur" id="originalDur">—</div>
                     </div>
                     <div class="audio-card accent-border">
-                        <div class="audio-card-label">
-                            <div class="dot dot-protected"></div>
-                            <span>Protected</span>
-                        </div>
+                        <div class="audio-card-label"><div class="dot dot-protected"></div><span>Protected</span></div>
                         <audio controls id="protectedPlayer"></audio>
                         <div class="audio-dur" id="protectedDur">—</div>
                     </div>
                 </div>
                 <button class="btn-download" id="btnDownload">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
                     <span>Download Protected File</span>
                 </button>
             </div>
 
             <div class="trust-bar">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5">
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" />
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round"/></svg>
                 <span>Audio is processed locally — never stored or shared.</span>
                 <button class="reset-btn" id="btnReset" style="display:none;">↺ Start over</button>
             </div>
         </div>
     </div>
 
-    <section class="how-section" id="howSection">
+    <section class="how-section">
         <h2 class="how-title">How It Works</h2>
         <div class="how-grid">
-            <div class="how-card">
-                <div class="how-step">1</div>
-                <h3>Upload Audio</h3>
-                <p>Drop in any voice recording — a podcast clip, voiceover, or voice note.</p>
-            </div>
-            <div class="how-card">
-                <div class="how-step">2</div>
-                <h3>Apply Shield</h3>
-                <p>Our AI adds adversarial perturbations that are inaudible to humans but disruptive to cloning models.</p>
-            </div>
-            <div class="how-card">
-                <div class="how-step">3</div>
-                <h3>Stay Protected</h3>
-                <p>Download your armored audio. Any cloning attempt will produce garbled, unusable output.</p>
-            </div>
+            <div class="how-card"><div class="how-step">1</div><h3>Upload Audio</h3><p>Drop in any voice recording — a podcast clip, voiceover, or voice note.</p></div>
+            <div class="how-card"><div class="how-step">2</div><h3>Apply Shield</h3><p>5 adversarial layers add imperceptible perturbations that destroy AI cloning fingerprints.</p></div>
+            <div class="how-card"><div class="how-step">3</div><h3>Stay Protected</h3><p>Download your armored audio. Any cloning attempt will produce garbled, unusable output.</p></div>
         </div>
     </section>
 
-    <div class="bottom-note">
-        <p>Built with ♥ for voice security · VocalArmor © 2026</p>
-    </div>
+    <div class="bottom-note"><p>Built with ♥ for voice security · VocalArmor © 2026</p></div>
 
-    <script>
-        // ─── Particle System ───
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        const PARTICLE_COUNT = 60;
+<script>
+// ─── Config ───────────────────────────────────────────────
+const API_BASE        = 'https://voice-armor.onrender.com';
+const HEALTH_URL      = `${API_BASE}/health`;
+const PROTECT_URL     = `${API_BASE}/protect-voice`;
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+// Render free tier cold-start can take up to 60s
+// We poll /health until it responds, then fire the real request
+const WAKE_POLL_MS    = 4000;    // how often to ping while waking
+const KEEPALIVE_MS    = 9 * 60 * 1000;  // ping every 9 min to prevent sleep
+const REQUEST_TIMEOUT = 5 * 60 * 1000;  // 5 min hard timeout on protect request
 
-        class Particle {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.3;
-                this.vy = (Math.random() - 0.5) * 0.3;
-                this.radius = Math.random() * 1.5 + 0.5;
-                this.alpha = Math.random() * 0.3 + 0.05;
+// ─── Particle System ──────────────────────────────────────
+const canvas = document.getElementById('particleCanvas');
+const ctx    = canvas.getContext('2d');
+let particles = [];
+const PARTICLE_COUNT = 60;
+
+function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Particle {
+    constructor(){ this.reset(); }
+    reset(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.vx=(Math.random()-.5)*.3; this.vy=(Math.random()-.5)*.3; this.radius=Math.random()*1.5+.5; this.alpha=Math.random()*.3+.05; }
+    update(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>canvas.width)this.vx*=-1; if(this.y<0||this.y>canvas.height)this.vy*=-1; }
+    draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fillStyle=`rgba(0,212,170,${this.alpha})`; ctx.fill(); }
+}
+for(let i=0;i<PARTICLE_COUNT;i++) particles.push(new Particle());
+function drawLines(){ for(let i=0;i<particles.length;i++)for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<150){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,212,170,${.04*(1-dist/150)})`;ctx.lineWidth=.5;ctx.stroke();}}}
+function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{p.update();p.draw();}); drawLines(); requestAnimationFrame(animateParticles); }
+animateParticles();
+
+// ─── Waveform ─────────────────────────────────────────────
+function drawWaveform(audioBuffer){
+    const wCanvas=document.getElementById('waveformCanvas');
+    const wCtx=wCanvas.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    const rect=wCanvas.getBoundingClientRect();
+    wCanvas.width=rect.width*dpr; wCanvas.height=rect.height*dpr;
+    wCtx.scale(dpr,dpr);
+    const data=audioBuffer.getChannelData(0);
+    const step=Math.ceil(data.length/rect.width);
+    const amp=rect.height/2;
+    wCtx.clearRect(0,0,rect.width,rect.height);
+    const grad=wCtx.createLinearGradient(0,0,rect.width,0);
+    grad.addColorStop(0,'rgba(0,212,170,.6)');grad.addColorStop(.5,'rgba(0,240,192,.8)');grad.addColorStop(1,'rgba(0,170,255,.6)');
+    wCtx.beginPath(); wCtx.moveTo(0,amp);
+    for(let i=0;i<rect.width;i++){let min=1,max=-1;for(let j=0;j<step;j++){const d=data[i*step+j]||0;if(d<min)min=d;if(d>max)max=d;}wCtx.lineTo(i,(1+min)*amp);}
+    for(let i=rect.width-1;i>=0;i--){let max=-1;for(let j=0;j<step;j++){const d=data[i*step+j]||0;if(d>max)max=d;}wCtx.lineTo(i,(1+max)*amp);}
+    wCtx.closePath(); wCtx.fillStyle=grad; wCtx.fill();
+    wCtx.beginPath();wCtx.moveTo(0,amp);wCtx.lineTo(rect.width,amp);wCtx.strokeStyle='rgba(0,212,170,.15)';wCtx.lineWidth=1;wCtx.stroke();
+}
+
+// ─── DOM refs ─────────────────────────────────────────────
+const dropZone       = document.getElementById('dropZone');
+const fileInput      = document.getElementById('fileInput');
+const fileInfo       = document.getElementById('fileInfo');
+const fileName       = document.getElementById('fileName');
+const fileSize       = document.getElementById('fileSize');
+const btnProtect     = document.getElementById('btnProtect');
+const btnLabel       = document.getElementById('btnLabel');
+const waveBars       = document.getElementById('waveBars');
+const progressWrap   = document.getElementById('progressWrap');
+const progressBar    = document.getElementById('progressBar');
+const progressPct    = document.getElementById('progressPct');
+const statusMsg      = document.getElementById('statusMsg');
+const outputWrap     = document.getElementById('outputWrap');
+const originalPlayer = document.getElementById('originalPlayer');
+const protectedPlayer= document.getElementById('protectedPlayer');
+const originalDur    = document.getElementById('originalDur');
+const protectedDur   = document.getElementById('protectedDur');
+const btnDownload    = document.getElementById('btnDownload');
+const btnReset       = document.getElementById('btnReset');
+const waveformWrap   = document.getElementById('waveformWrap');
+const serverBanner   = document.getElementById('serverBanner');
+const bannerText     = document.getElementById('bannerText');
+const bannerCountdown= document.getElementById('bannerCountdown');
+const statusDot      = document.getElementById('statusDot');
+const statusText     = document.getElementById('statusText');
+
+let selectedFile  = null;
+let protectedBlob = null;
+let serverAwake   = false;   // becomes true once /health responds 200
+let keepAliveTimer= null;
+let countdownTimer= null;
+
+// ─── Helpers ──────────────────────────────────────────────
+function formatSize(b){ if(b<1024)return b+' B'; if(b<1048576)return(b/1024).toFixed(1)+' KB'; return(b/1048576).toFixed(1)+' MB'; }
+function formatDur(s){ const m=Math.floor(s/60),sec=Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
+
+// AbortController-based fetch with timeout
+async function fetchWithTimeout(url, options, timeoutMs){
+    const ctrl = new AbortController();
+    const id    = setTimeout(()=>ctrl.abort(), timeoutMs);
+    try {
+        const res = await fetch(url, { ...options, signal: ctrl.signal });
+        return res;
+    } finally {
+        clearTimeout(id);
+    }
+}
+
+// ─── Server status UI helpers ─────────────────────────────
+function setNavStatus(state){
+    // state: 'checking' | 'online' | 'waking' | 'offline'
+    statusDot.className = 'pulse-dot';
+    if(state === 'online')  { statusDot.classList.add(); statusText.textContent = 'System Active'; }
+    if(state === 'checking'){ statusText.textContent = 'Checking server…'; }
+    if(state === 'waking')  { statusDot.classList.add('warning'); statusText.textContent = 'Server waking up…'; }
+    if(state === 'offline') { statusDot.classList.add('danger');  statusText.textContent = 'Server offline'; }
+}
+
+function showWakeBanner(secondsElapsed){
+    serverBanner.classList.add('show');
+    const remaining = Math.max(0, 60 - secondsElapsed);
+    if(remaining > 0) bannerCountdown.textContent = `~${remaining}s remaining`;
+    else bannerCountdown.textContent = 'almost ready…';
+}
+function hideWakeBanner(){ serverBanner.classList.remove('show'); }
+
+function startCountdown(){
+    let elapsed = 0;
+    countdownTimer = setInterval(()=>{
+        elapsed += 1;
+        showWakeBanner(elapsed);
+        if(elapsed >= 120) clearInterval(countdownTimer); // give up showing countdown after 2 min
+    }, 1000);
+}
+function stopCountdown(){ clearInterval(countdownTimer); }
+
+// ─── Server health check & keep-alive ─────────────────────
+async function checkHealth(){
+    try {
+        const res = await fetchWithTimeout(HEALTH_URL, {method:'GET'}, 8000);
+        return res.ok;
+    } catch(e){
+        return false;
+    }
+}
+
+async function waitForServer(onWaking){
+    // First quick check
+    setNavStatus('checking');
+    const alive = await checkHealth();
+    if(alive){
+        serverAwake = true;
+        setNavStatus('online');
+        hideWakeBanner();
+        return true;
+    }
+
+    // Server is sleeping — start wake-up UX
+    setNavStatus('waking');
+    onWaking && onWaking();
+
+    // Poll until it responds
+    return new Promise((resolve)=>{
+        const interval = setInterval(async ()=>{
+            const alive = await checkHealth();
+            if(alive){
+                clearInterval(interval);
+                stopCountdown();
+                serverAwake = true;
+                setNavStatus('online');
+                hideWakeBanner();
+                resolve(true);
             }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(0, 212, 170, ${this.alpha})`;
-                ctx.fill();
-            }
-        }
+        }, WAKE_POLL_MS);
 
-        for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+        // Give up after 3 minutes
+        setTimeout(()=>{
+            clearInterval(interval);
+            stopCountdown();
+            setNavStatus('offline');
+            resolve(false);
+        }, 3 * 60 * 1000);
+    });
+}
 
-        function drawLines() {
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 150) {
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(0, 212, 170, ${0.04 * (1 - dist / 150)})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
+function startKeepAlive(){
+    if(keepAliveTimer) return;
+    keepAliveTimer = setInterval(async ()=>{
+        await checkHealth(); // fire-and-forget ping
+    }, KEEPALIVE_MS);
+}
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            drawLines();
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
+// Initial health check on page load
+(async ()=>{
+    const alive = await checkHealth();
+    if(alive){ serverAwake=true; setNavStatus('online'); startKeepAlive(); }
+    else { setNavStatus('waking'); }
+})();
 
-        // ─── Waveform Visualizer ───
-        function drawWaveform(audioBuffer) {
-            const wCanvas = document.getElementById('waveformCanvas');
-            const wCtx = wCanvas.getContext('2d');
-            const dpr = window.devicePixelRatio || 1;
-            const rect = wCanvas.getBoundingClientRect();
-            wCanvas.width = rect.width * dpr;
-            wCanvas.height = rect.height * dpr;
-            wCtx.scale(dpr, dpr);
+// ─── File handling ────────────────────────────────────────
+function setFile(file){
+    if(!file) return;
+    if(!file.type.startsWith('audio/') && !file.name.match(/\.(wav|mp3|m4a|ogg|flac|aac)$/i)){
+        alert('Please upload a valid audio file.'); return;
+    }
+    selectedFile = file;
+    fileName.textContent = file.name;
+    fileSize.textContent  = formatSize(file.size);
+    fileInfo.classList.add('show');
+    btnProtect.disabled = false;
 
-            const data = audioBuffer.getChannelData(0);
-            const step = Math.ceil(data.length / rect.width);
-            const amp = rect.height / 2;
+    const url = URL.createObjectURL(file);
+    originalPlayer.src = url;
+    originalPlayer.onloadedmetadata = ()=>{ originalDur.textContent = formatDur(originalPlayer.duration); };
 
-            wCtx.clearRect(0, 0, rect.width, rect.height);
+    const reader = new FileReader();
+    reader.onload = function(e){
+        const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        audioCtx.decodeAudioData(e.target.result).then(buffer=>{
+            waveformWrap.classList.add('show');
+            requestAnimationFrame(()=>drawWaveform(buffer));
+            audioCtx.close();
+        }).catch(()=>waveformWrap.classList.remove('show'));
+    };
+    reader.readAsArrayBuffer(file);
+}
 
-            const grad = wCtx.createLinearGradient(0, 0, rect.width, 0);
-            grad.addColorStop(0, 'rgba(0, 212, 170, 0.6)');
-            grad.addColorStop(0.5, 'rgba(0, 240, 192, 0.8)');
-            grad.addColorStop(1, 'rgba(0, 170, 255, 0.6)');
+dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e=>{ e.preventDefault(); dropZone.classList.remove('drag-over'); setFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', ()=>setFile(fileInput.files[0]));
 
-            wCtx.beginPath();
-            wCtx.moveTo(0, amp);
-            for (let i = 0; i < rect.width; i++) {
-                let min = 1.0, max = -1.0;
-                for (let j = 0; j < step; j++) {
-                    const datum = data[(i * step) + j] || 0;
-                    if (datum < min) min = datum;
-                    if (datum > max) max = datum;
-                }
-                wCtx.lineTo(i, (1 + min) * amp);
-            }
-            for (let i = rect.width - 1; i >= 0; i--) {
-                let max = -1.0;
-                for (let j = 0; j < step; j++) {
-                    const datum = data[(i * step) + j] || 0;
-                    if (datum > max) max = datum;
-                }
-                wCtx.lineTo(i, (1 + max) * amp);
-            }
-            wCtx.closePath();
-            wCtx.fillStyle = grad;
-            wCtx.fill();
+// ─── Protect flow ─────────────────────────────────────────
+btnProtect.addEventListener('click', async ()=>{
+    if(!selectedFile) return;
 
-            wCtx.beginPath();
-            wCtx.moveTo(0, amp);
-            wCtx.lineTo(rect.width, amp);
-            wCtx.strokeStyle = 'rgba(0, 212, 170, 0.15)';
-            wCtx.lineWidth = 1;
-            wCtx.stroke();
-        }
+    btnProtect.disabled = true;
+    btnLabel.style.display = 'none';
+    waveBars.classList.add('show');
+    progressWrap.classList.add('show');
+    outputWrap.classList.remove('show');
+    btnReset.style.display = 'none';
 
-        // ─── DOM Elements ───
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileName = document.getElementById('fileName');
-        const fileSize = document.getElementById('fileSize');
-        const btnProtect = document.getElementById('btnProtect');
-        const btnLabel = document.getElementById('btnLabel');
-        const waveBars = document.getElementById('waveBars');
-        const progressWrap = document.getElementById('progressWrap');
-        const progressBar = document.getElementById('progressBar');
-        const progressPct = document.getElementById('progressPct');
-        const statusMsg = document.getElementById('statusMsg');
-        const outputWrap = document.getElementById('outputWrap');
-        const originalPlayer = document.getElementById('originalPlayer');
-        const protectedPlayer = document.getElementById('protectedPlayer');
-        const originalDur = document.getElementById('originalDur');
-        const protectedDur = document.getElementById('protectedDur');
-        const btnDownload = document.getElementById('btnDownload');
-        const btnReset = document.getElementById('btnReset');
-        const waveformWrap = document.getElementById('waveformWrap');
+    const stages = [
+        { msg:'Analyzing voice signature…',        target:20 },
+        { msg:'Generating adversarial mask…',       target:45 },
+        { msg:'Applying spectral perturbations…',   target:65 },
+        { msg:'Injecting phase randomisation…',     target:80 },
+        { msg:'Verifying protection integrity…',    target:95 },
+    ];
+    let pct=0, stageIdx=0;
+    statusMsg.className = 'status-msg';
+    statusMsg.textContent = stages[0].msg;
+    progressBar.className = 'progress-bar';
 
-        let selectedFile = null;
-        let protectedBlob = null;
+    // ── If server not yet awake, wait for it first ──
+    if(!serverAwake){
+        // Switch to indeterminate waking progress
+        progressBar.classList.add('indeterminate','warning-bar');
+        statusMsg.classList.add('warning');
+        statusMsg.textContent = 'Waking server up — please wait…';
+        progressPct.textContent = '…';
+        btnProtect.classList.add('waking');
 
-        function formatSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-            return (bytes / 1048576).toFixed(1) + ' MB';
-        }
+        showWakeBanner(0);
+        startCountdown();
 
-        function formatDur(secs) {
-            const m = Math.floor(secs / 60);
-            const s = Math.floor(secs % 60);
-            return `${m}:${s.toString().padStart(2, '0')}`;
-        }
-
-        function setFile(file) {
-            if (!file) return;
-            if (!file.type.startsWith('audio/') && !file.name.match(/\.(wav|mp3|m4a|ogg|flac|aac)$/i)) {
-                alert('Please upload a valid audio file.');
-                return;
-            }
-            selectedFile = file;
-            fileName.textContent = file.name;
-            fileSize.textContent = formatSize(file.size);
-            fileInfo.classList.add('show');
-            btnProtect.disabled = false;
-
-            const url = URL.createObjectURL(file);
-            originalPlayer.src = url;
-            originalPlayer.onloadedmetadata = () => {
-                originalDur.textContent = formatDur(originalPlayer.duration);
-            };
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                audioCtx.decodeAudioData(e.target.result).then(buffer => {
-                    waveformWrap.classList.add('show');
-                    requestAnimationFrame(() => drawWaveform(buffer));
-                    audioCtx.close();
-                }).catch(() => {
-                    waveformWrap.classList.remove('show');
-                });
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            setFile(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
-
-        // ─── Protect Button ───
-        btnProtect.addEventListener('click', async () => {
-            if (!selectedFile) return;
-
-            btnProtect.disabled = true;
-            btnLabel.style.display = 'none';
-            waveBars.classList.add('show');
-            progressWrap.classList.add('show');
-            outputWrap.classList.remove('show');
-            btnReset.style.display = 'none';
-
-            // ── Updated stages with cold start warning ──
-            const stages = [
-                { msg: 'Waking up server — first request may take 30–50s…', target: 15 },
-                { msg: 'Analyzing voice signature…', target: 40 },
-                { msg: 'Generating adversarial mask…', target: 65 },
-                { msg: 'Applying perturbation layer…', target: 85 },
-                { msg: 'Verifying protection integrity…', target: 95 },
-            ];
-
-            let pct = 0;
-            let stageIdx = 0;
-            statusMsg.textContent = stages[0].msg;
-
-            const tick = setInterval(() => {
-                const stage = stages[stageIdx];
-                pct += Math.random() * 4 + 1;  // slower tick to match longer wait
-                if (pct >= stage.target) {
-                    stageIdx = Math.min(stageIdx + 1, stages.length - 1);
-                    statusMsg.textContent = stages[stageIdx].msg;
-                }
-                pct = Math.min(pct, 97);
-                progressBar.style.width = pct + '%';
-                progressPct.textContent = Math.round(pct) + '%';
-            }, 300);
-
-            const formData = new FormData();
-            formData.append('audio', selectedFile);
-
-            // ── 2 minute timeout to handle Render cold starts ──
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 120000);
-
-            let resultBlob = null;
-            let errorMsg = null;
-
-            try {
-                const res = await fetch('https://voice-armor.onrender.com/protect-voice', {
-                    method: 'POST',
-                    body: formData,
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-
-                if (res.ok) {
-                    resultBlob = await res.blob();
-                } else {
-                    const errData = await res.json().catch(() => null);
-                    errorMsg = errData?.error || `Server error (${res.status})`;
-                }
-            } catch (err) {
-                clearTimeout(timeoutId);
-                if (err.name === 'AbortError') {
-                    errorMsg = 'Request timed out — server is waking up, please try again in a moment.';
-                } else {
-                    errorMsg = 'Cannot connect to server. Make sure the backend is running.';
-                }
-            }
-
-            clearInterval(tick);
-
-            if (errorMsg) {
-                progressBar.style.width = '100%';
-                progressBar.style.background = 'linear-gradient(90deg, #ff5c5c, #ff8a80)';
-                progressPct.textContent = '✗';
-                statusMsg.textContent = errorMsg;
-                statusMsg.style.color = 'var(--danger)';
-
-                await new Promise(r => setTimeout(r, 3000));
-
-                progressWrap.classList.remove('show');
-                waveBars.classList.remove('show');
-                btnLabel.style.display = '';
-                btnLabel.textContent = 'Protect My Voice';
-                btnProtect.disabled = false;
-                progressBar.style.width = '0%';
-                progressBar.style.background = '';
-                progressPct.textContent = '0%';
-                statusMsg.style.color = '';
-                return;
-            }
-
-            progressBar.style.width = '100%';
-            progressPct.textContent = '100%';
-            statusMsg.textContent = 'Protection complete ✓';
-
-            await new Promise(r => setTimeout(r, 500));
-
-            protectedBlob = resultBlob;
-            const protUrl = URL.createObjectURL(protectedBlob);
-            protectedPlayer.src = protUrl;
-            protectedPlayer.onloadedmetadata = () => {
-                protectedDur.textContent = formatDur(protectedPlayer.duration);
-            };
-
-            btnDownload.onclick = () => {
-                const a = document.createElement('a');
-                a.href = protUrl;
-                a.download = 'protected_' + selectedFile.name;
-                a.click();
-            };
-
+        const alive = await waitForServer();
+        if(!alive){
+            // Give up
             progressWrap.classList.remove('show');
-            outputWrap.classList.add('show');
             waveBars.classList.remove('show');
             btnLabel.style.display = '';
-            btnLabel.textContent = '✓ Voice Protected';
-            btnProtect.disabled = true;
-            btnReset.style.display = 'block';
-        });
-
-        btnReset.addEventListener('click', () => {
-            selectedFile = null;
-            protectedBlob = null;
-            fileInput.value = '';
-            fileInfo.classList.remove('show');
-            waveformWrap.classList.remove('show');
-            outputWrap.classList.remove('show');
-            progressWrap.classList.remove('show');
-            progressBar.style.width = '0%';
-            progressPct.textContent = '0%';
             btnLabel.textContent = 'Protect My Voice';
-            btnProtect.disabled = true;
-            btnReset.style.display = 'none';
-            originalPlayer.src = '';
-            protectedPlayer.src = '';
-            originalDur.textContent = '—';
-            protectedDur.textContent = '—';
-        });
+            btnProtect.disabled = false;
+            btnProtect.classList.remove('waking');
+            hideWakeBanner();
+            alert('Could not reach the server after 3 minutes. Please try again later.');
+            return;
+        }
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animationPlayState = 'running';
-                }
-            });
-        }, { threshold: 0.1 });
+        // Server is awake — reset progress UI and continue
+        progressBar.classList.remove('indeterminate','warning-bar');
+        statusMsg.classList.remove('warning');
+        statusMsg.textContent = stages[0].msg;
+        progressPct.textContent = '0%';
+        btnProtect.classList.remove('waking');
+        startKeepAlive();
+    }
 
-        document.querySelectorAll('.how-card').forEach(card => {
-            observer.observe(card);
-        });
-    </script>
+    // ── Fake progress ticker ──
+    const tick = setInterval(()=>{
+        const stage = stages[stageIdx];
+        pct += Math.random()*8+3;
+        if(pct >= stage.target){ stageIdx = Math.min(stageIdx+1, stages.length-1); statusMsg.textContent = stages[stageIdx].msg; }
+        pct = Math.min(pct, 97);
+        progressBar.style.width = pct+'%';
+        progressPct.textContent = Math.round(pct)+'%';
+    }, 120);
+
+    // ── Real API call (5 min timeout) ──
+    const formData = new FormData();
+    formData.append('audio', selectedFile);
+
+    let resultBlob = null;
+    let errorMsg   = null;
+
+    try {
+        const res = await fetchWithTimeout(PROTECT_URL, { method:'POST', body:formData }, REQUEST_TIMEOUT);
+        if(res.ok){
+            resultBlob = await res.blob();
+        } else {
+            const errData = await res.json().catch(()=>null);
+            errorMsg = errData?.detail || errData?.error || `Server error (${res.status})`;
+        }
+    } catch(err){
+        if(err.name === 'AbortError'){
+            errorMsg = 'Request timed out (5 min). Try a shorter audio file.';
+        } else {
+            errorMsg = 'Cannot connect to server. Please try again.';
+        }
+    }
+
+    clearInterval(tick);
+
+    // ── Error ──
+    if(errorMsg){
+        progressBar.style.width = '100%';
+        progressBar.style.background = 'linear-gradient(90deg,#ff5c5c,#ff8a80)';
+        progressPct.textContent = '✗';
+        statusMsg.textContent = errorMsg;
+        statusMsg.style.color = 'var(--danger)';
+        await new Promise(r=>setTimeout(r,2500));
+        progressWrap.classList.remove('show');
+        waveBars.classList.remove('show');
+        btnLabel.style.display = '';
+        btnLabel.textContent = 'Protect My Voice';
+        btnProtect.disabled = false;
+        progressBar.style.width = '0%';
+        progressBar.style.background = '';
+        progressPct.textContent = '0%';
+        statusMsg.style.color = '';
+        return;
+    }
+
+    // ── Success ──
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+    statusMsg.textContent   = 'Protection complete ✓';
+    await new Promise(r=>setTimeout(r,500));
+
+    protectedBlob = resultBlob;
+    const protUrl = URL.createObjectURL(protectedBlob);
+    protectedPlayer.src = protUrl;
+    protectedPlayer.onloadedmetadata = ()=>{ protectedDur.textContent = formatDur(protectedPlayer.duration); };
+
+    btnDownload.onclick = ()=>{
+        const a = document.createElement('a');
+        a.href     = protUrl;
+        a.download = 'protected_' + selectedFile.name;
+        a.click();
+    };
+
+    progressWrap.classList.remove('show');
+    outputWrap.classList.add('show');
+    waveBars.classList.remove('show');
+    btnLabel.style.display = '';
+    btnLabel.textContent   = '✓ Voice Protected';
+    btnProtect.disabled    = true;
+    btnReset.style.display = 'block';
+});
+
+// ─── Reset ────────────────────────────────────────────────
+btnReset.addEventListener('click', ()=>{
+    selectedFile = protectedBlob = null;
+    fileInput.value = '';
+    fileInfo.classList.remove('show');
+    waveformWrap.classList.remove('show');
+    outputWrap.classList.remove('show');
+    progressWrap.classList.remove('show');
+    progressBar.style.width = '0%';
+    progressPct.textContent = '0%';
+    btnLabel.textContent    = 'Protect My Voice';
+    btnProtect.disabled     = true;
+    btnReset.style.display  = 'none';
+    originalPlayer.src = protectedPlayer.src = '';
+    originalDur.textContent = protectedDur.textContent = '—';
+});
+
+// Scroll animation
+const observer = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.style.animationPlayState='running'; });
+},{ threshold:.1 });
+document.querySelectorAll('.how-card').forEach(c=>observer.observe(c));
+</script>
 </body>
-
 </html>
