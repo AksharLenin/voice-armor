@@ -54,7 +54,7 @@ def protect_audio(y, sr):
     )
     right = librosa.effects.pitch_shift(
         y[1], sr=sr, n_steps=PITCH_SHIFT,
-        bins_per_octave=12, res_type='soxr_hq', n_fft=2048
+        bins_per_octave=12, res_type='kaiser_fast', n_fft=2048  # ← and this
     )
 
     # Pad or trim to exactly match original length
