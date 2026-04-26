@@ -1,7 +1,9 @@
-fastapi==0.104.1
-uvicorn==0.24.0
-numpy==1.24.3
-librosa==0.10.0
-soundfile==0.12.1
-python-multipart==0.0.6
-ffmpeg-python==0.2.1
+fastapi
+uvicorn
+numpy
+librosa
+soundfile
+python-multipart
+soxr
+audioread
+imageio-ffmpeg
