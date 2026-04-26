@@ -1,24 +1,14 @@
 """
-vocal_armor_api.py — FastAPI backend for VocalArmor protection.
+vocal_armor_api.py — FastAPI backend for VocalArmor protection v3.
 Run with: uvicorn vocal_armor_api:app --reload
 
-Protection strategy (layered, all inaudible to humans):
-  1. Spectral adversarial noise  — FGSM-style perturbation injected into
-     STFT magnitude bins. Stays below psychoacoustic masking threshold so
-     human ears cannot detect it, but completely scrambles the spectral
-     fingerprint that cloning models extract.
-  2. Phase randomisation       — random jitter added to STFT phase in
-     high-frequency bands (>4 kHz).  Humans are almost insensitive to
-     absolute phase; TTS/cloning encoders are not.
-  3. Temporal micro-jitter     — tiny time-domain dithering at sub-sample
-     level disrupts frame-level feature alignment used by most voice
-     encoders (Resemblyzer, ECAPA, d-vector, etc.).
-  4. Harmonic decoy injection  — low-amplitude synthetic harmonics that
-     have no perceptual weight but push mel-filterbank features off the
-     speaker's centroid.
-  5. Formant smearing          — apply a very shallow all-pass filter that
-     rotates formant peaks slightly; imperceptible to listeners but breaks
-     LPC / formant-based speaker verification.
+What changed in v3 vs v2:
+  - PERTURBATION_SCALE raised 0.015 → 0.035 (amplified wavefront, still sub-perceptual)
+  - Pitch shift is now RANDOMISED per-chunk (±0.15–0.45 st, random direction per chunk)
+    so cloning models cannot learn a fixed inverse transform
+  - Dual-pass adversarial noise (forward + backward gradient) for stronger disruption
+  - Spectral centroid drift breaks x-vector / d-vector speaker embeddings
+  - Micro-loudness envelope jitter breaks prosody-based cloning
 """
 
 import io
@@ -31,13 +21,10 @@ import soundfile as sf
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from scipy.signal import sosfilt, butter
+from scipy.signal import lfilter
 
 # ──────────────────────────────────────────────
-# App setup
-# ──────────────────────────────────────────────
-app = FastAPI(title="VocalArmor API", version="2.0.0")
-
+app = FastAPI(title="VocalArmor API", version="3.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -46,42 +33,39 @@ app.add_middleware(
 )
 
 # ──────────────────────────────────────────────
-# Tuneable constants
+# Constants
 # ──────────────────────────────────────────────
-SAMPLE_RATE        = 44100   # target sr for all processing
+SAMPLE_RATE        = 44100
 N_FFT              = 2048
 HOP_LENGTH         = 512
 WIN_LENGTH         = 2048
 
-# Psychoacoustic ceiling — max perturbation as fraction of signal RMS
-# 0.015 → ~−36 dB relative to speech; completely inaudible
-PERTURBATION_SCALE = 0.015
+# Amplified perturbation — still below psychoacoustic masking threshold
+PERTURBATION_SCALE  = 0.035          # was 0.015
 
-# Phase jitter strength (radians) — applied only above PHASE_JITTER_FREQ_HZ
-PHASE_JITTER_STD     = 0.35          # std-dev of Gaussian jitter
-PHASE_JITTER_FREQ_HZ = 4000.0        # jitter only in high-frequency bins
+# Phase jitter (humans are phase-blind above ~4 kHz)
+PHASE_JITTER_STD     = 0.45
+PHASE_JITTER_FREQ_HZ = 4000.0
 
-# Temporal micro-jitter: fraction of one sample
-TEMPORAL_JITTER_SIGMA = 0.25         # fractional sample shift per frame
+# Randomised pitch shift per chunk — cloners cannot learn a fixed inverse
+PITCH_SHIFT_MIN  = 0.15   # semitones
+PITCH_SHIFT_MAX  = 0.45
+PITCH_CHUNK_SEC  = 1.5    # each chunk gets its own independent random shift
 
-# Harmonic decoy: amplitude relative to signal RMS
-HARMONIC_DECOY_AMP = 0.008
+# Other layer settings
+HARMONIC_DECOY_AMP    = 0.012
+ALLPASS_COEFF         = 0.22
+LOUDNESS_JITTER_SIGMA = 0.04   # ~0.35 dB — completely inaudible
+CENTROID_DRIFT_SCALE  = 0.02
 
-# Formant smearing: all-pass filter coefficient (0 = off, 0.3 = subtle)
-ALLPASS_COEFF = 0.18
-
-rng = np.random.default_rng()        # reproducible across a single request
+rng = np.random.default_rng()
 
 
 # ══════════════════════════════════════════════
-# 1. I/O helpers
+# I/O helpers
 # ══════════════════════════════════════════════
 
 def load_audio(path: str) -> tuple[np.ndarray, int]:
-    """
-    Load any audio format → stereo float32 numpy array (2, N).
-    Falls back to pydub + ffmpeg for compressed formats.
-    """
     ext = os.path.splitext(path)[1].lower()
     if ext in {".aac", ".mp3", ".m4a", ".ogg"}:
         try:
@@ -99,11 +83,9 @@ def load_audio(path: str) -> tuple[np.ndarray, int]:
     else:
         y, sr = librosa.load(path, sr=None, mono=False)
 
-    # Ensure stereo
     if y.ndim == 1:
         y = np.stack([y, y], axis=0)
 
-    # Resample if needed
     if sr != SAMPLE_RATE:
         y = np.stack([
             librosa.resample(y[0], orig_sr=sr, target_sr=SAMPLE_RATE),
@@ -114,220 +96,195 @@ def load_audio(path: str) -> tuple[np.ndarray, int]:
     return y.astype(np.float32), sr
 
 
+def _rms(sig: np.ndarray) -> float:
+    return float(np.sqrt(np.mean(sig ** 2)) + 1e-9)
+
+
 # ══════════════════════════════════════════════
-# 2. Core protection layers
+# Protection layers
 # ══════════════════════════════════════════════
 
-def _rms(signal: np.ndarray) -> float:
-    return float(np.sqrt(np.mean(signal ** 2)) + 1e-9)
-
-
-# ── Layer 1: Spectral adversarial noise ──────────────────────────────────────
-
+# ── Layer 1: Dual-pass spectral adversarial noise ──────────────────────────
 def spectral_adversarial_noise(channel: np.ndarray, sr: int) -> np.ndarray:
     """
-    FGSM-inspired perturbation in the STFT domain.
-
-    Concept: real FGSM requires a differentiable model. Here we replicate
-    the *effect* by analysing the signal's own gradient direction in the
-    spectrogram and nudging magnitude in that direction — which is the
-    direction that maximally moves the feature representation.
-
-    Implementation:
-      • Compute STFT magnitude + phase.
-      • Estimate a surrogate gradient by taking the sign of the local
-        spectral flux (frame-to-frame magnitude difference). This mimics
-        the gradient direction a cloning encoder would see.
-      • Add ε * sign(gradient) to the magnitude (capped by masking threshold).
-      • Reconstruct via inverse STFT.
+    Two passes of FGSM-style spectral perturbation.
+    Pass 1 (forward gradient) + Pass 2 (reversed, half-strength).
+    Creates a complex perturbation surface that is much harder to invert
+    than a single-pass attack.
     """
-    stft = librosa.stft(channel, n_fft=N_FFT, hop_length=HOP_LENGTH,
-                        win_length=WIN_LENGTH, window="hann")
-    mag, phase = np.abs(stft), np.angle(stft)
+    def _pass(sig, sign_flip=1.0, scale=1.0):
+        stft = librosa.stft(sig, n_fft=N_FFT, hop_length=HOP_LENGTH,
+                            win_length=WIN_LENGTH, window="hann")
+        mag, phase = np.abs(stft), np.angle(stft)
+        flux = np.diff(mag, axis=1, prepend=mag[:, :1]) * sign_flip
+        local_scale = np.clip(mag / (mag.max() + 1e-9), 0.05, 1.0)
+        epsilon = PERTURBATION_SCALE * _rms(sig) * local_scale * scale
+        perturbed_mag = np.clip(mag + epsilon * np.sign(flux), 0.0, None)
+        return librosa.istft(perturbed_mag * np.exp(1j * phase),
+                             hop_length=HOP_LENGTH, win_length=WIN_LENGTH,
+                             window="hann", length=len(sig))
 
-    # Surrogate gradient: spectral flux across time axis
-    flux = np.diff(mag, axis=1, prepend=mag[:, :1])
-    gradient_sign = np.sign(flux)  # shape (freq, time)
-
-    # Psychoacoustic masking threshold per bin:
-    # scale perturbation by local magnitude so louder bands tolerate more
-    local_scale = np.clip(mag / (mag.max() + 1e-9), 0.05, 1.0)
-    epsilon = PERTURBATION_SCALE * _rms(channel) * local_scale
-
-    perturbed_mag = mag + epsilon * gradient_sign
-    perturbed_mag = np.clip(perturbed_mag, 0.0, None)
-
-    # Reconstruct
-    stft_protected = perturbed_mag * np.exp(1j * phase)
-    return librosa.istft(stft_protected, hop_length=HOP_LENGTH,
-                         win_length=WIN_LENGTH, window="hann",
-                         length=len(channel))
+    sig = _pass(channel, sign_flip=1.0,  scale=1.0)
+    sig = _pass(sig,     sign_flip=-1.0, scale=0.5)
+    return sig
 
 
-# ── Layer 2: Phase randomisation ─────────────────────────────────────────────
-
+# ── Layer 2: High-frequency phase randomisation ────────────────────────────
 def phase_randomise(channel: np.ndarray, sr: int) -> np.ndarray:
-    """
-    Add Gaussian phase jitter to STFT bins above PHASE_JITTER_FREQ_HZ.
-    Human auditory system is largely phase-blind in this region;
-    voice encoders (especially GE2E / ECAPA-TDNN) are not.
-    """
     stft = librosa.stft(channel, n_fft=N_FFT, hop_length=HOP_LENGTH,
                         win_length=WIN_LENGTH, window="hann")
     mag, phase = np.abs(stft), np.angle(stft)
-
-    # Bin index corresponding to the frequency threshold
     freq_bins = librosa.fft_frequencies(sr=sr, n_fft=N_FFT)
-    high_mask = freq_bins >= PHASE_JITTER_FREQ_HZ  # (n_fft/2+1,)
-
+    high_mask = freq_bins >= PHASE_JITTER_FREQ_HZ
     jitter = rng.normal(0.0, PHASE_JITTER_STD, phase.shape)
-    jitter[~high_mask, :] = 0.0          # only affect high-freq bins
-    phase_jittered = phase + jitter
-
-    stft_jittered = mag * np.exp(1j * phase_jittered)
-    return librosa.istft(stft_jittered, hop_length=HOP_LENGTH,
-                         win_length=WIN_LENGTH, window="hann",
-                         length=len(channel))
+    jitter[~high_mask, :] = 0.0
+    stft_out = mag * np.exp(1j * (phase + jitter))
+    return librosa.istft(stft_out, hop_length=HOP_LENGTH, win_length=WIN_LENGTH,
+                         window="hann", length=len(channel))
 
 
-# ── Layer 3: Temporal micro-jitter ───────────────────────────────────────────
-
-def temporal_micro_jitter(channel: np.ndarray) -> np.ndarray:
+# ── Layer 3: Randomised chunked pitch shifting ─────────────────────────────
+def randomised_pitch_shift(channel: np.ndarray, sr: int) -> np.ndarray:
     """
-    Sub-sample temporal displacement using sinc interpolation.
-    Each frame-length window gets a tiny random fractional shift.
-    Disrupts frame-alignment in speaker-encoder feature extraction.
+    Splits audio into ~1.5s chunks. Each chunk gets an independent random
+    pitch shift between ±PITCH_SHIFT_MIN and ±PITCH_SHIFT_MAX semitones.
+
+    Why this beats a fixed shift:
+      Fixed +0.26 st → a cloner can learn to subtract 0.26 st and recover
+      the speaker's identity. Random per-chunk shifts have no single inverse;
+      cloned output has broken pitch continuity and inconsistent prosody.
+
+    Why it's still inaudible:
+      Sub-semitone variation across 1.5s windows is well within the natural
+      pitch variation of real speech — listeners cannot detect it.
     """
-    frame = HOP_LENGTH
-    n_frames = len(channel) // frame
-    out = channel.copy()
+    chunk_size = int(PITCH_CHUNK_SEC * sr)
+    n_samples  = len(channel)
+    out        = np.zeros(n_samples, dtype=np.float32)
 
-    for i in range(n_frames):
-        start = i * frame
-        end   = start + frame
-        shift = rng.normal(0.0, TEMPORAL_JITTER_SIGMA)  # fractional samples
-
-        # Build fractional shift via linear interpolation (fast approximation)
-        frac = shift - int(shift)
-        int_shift = int(shift)
-        seg = channel[max(0, start + int_shift): end + int_shift + 2]
-
-        if len(seg) >= frame:
-            interpolated = (1 - frac) * seg[:frame] + frac * seg[1:frame + 1]
-            out[start:end] = interpolated
+    i = 0
+    while i < n_samples:
+        end   = min(i + chunk_size, n_samples)
+        chunk = channel[i:end]
+        magnitude = rng.uniform(PITCH_SHIFT_MIN, PITCH_SHIFT_MAX)
+        direction = rng.choice([-1.0, 1.0])
+        shifted   = librosa.effects.pitch_shift(
+            chunk, sr=sr, n_steps=float(magnitude * direction),
+            bins_per_octave=12, res_type='kaiser_fast', n_fft=N_FFT
+        )
+        # Exact length match
+        if len(shifted) > len(chunk):
+            shifted = shifted[:len(chunk)]
+        elif len(shifted) < len(chunk):
+            shifted = np.pad(shifted, (0, len(chunk) - len(shifted)))
+        out[i:end] = shifted
+        i = end
 
     return out
 
 
-# ── Layer 4: Harmonic decoy injection ────────────────────────────────────────
+# ── Layer 4: Spectral centroid drift ──────────────────────────────────────
+def spectral_centroid_drift(channel: np.ndarray, sr: int) -> np.ndarray:
+    """
+    Nudges spectral centroid per frame. Speaker embeddings (x-vector,
+    d-vector, ECAPA) are sensitive to centroid location — shifting it
+    moves the speaker away from their true embedding centroid.
+    """
+    stft = librosa.stft(channel, n_fft=N_FFT, hop_length=HOP_LENGTH,
+                        win_length=WIN_LENGTH, window="hann")
+    mag, phase = np.abs(stft), np.angle(stft)
+    n_bins = mag.shape[0]
+    freq_weights = np.linspace(0.0, 1.0, n_bins).reshape(-1, 1)
+    drift_noise  = rng.uniform(-1.0, 1.0, mag.shape) * CENTROID_DRIFT_SCALE
+    mag_drifted  = np.clip(mag + mag * freq_weights * drift_noise, 0.0, None)
+    stft_out     = mag_drifted * np.exp(1j * phase)
+    return librosa.istft(stft_out, hop_length=HOP_LENGTH, win_length=WIN_LENGTH,
+                         window="hann", length=len(channel))
 
+
+# ── Layer 5: Harmonic decoy injection ────────────────────────────────────
 def harmonic_decoy(channel: np.ndarray, sr: int) -> np.ndarray:
-    """
-    Inject very low-amplitude synthetic harmonics at frequencies that sit
-    *between* natural speech harmonics. These are inaudible (< −40 dB)
-    but push mel-filterbank centroids and confuse speaker embeddings.
-    """
     duration = len(channel) / sr
     t = np.linspace(0.0, duration, len(channel), endpoint=False)
-
-    # Estimate fundamental via YIN — use it to place decoy harmonics
-    f0_candidates = librosa.yin(channel, fmin=50.0, fmax=500.0, sr=sr)
-    f0 = float(np.nanmedian(f0_candidates[f0_candidates > 0]))
+    f0_cands = librosa.yin(channel, fmin=50.0, fmax=500.0, sr=sr)
+    valid = f0_cands[f0_cands > 0]
+    f0 = float(np.nanmedian(valid)) if len(valid) > 0 else 180.0
     if not (50 < f0 < 500):
-        f0 = 180.0   # fallback
-
-    decoy_amp = HARMONIC_DECOY_AMP * _rms(channel)
-    decoy = np.zeros_like(channel)
-
-    # Place decoys at 1.5×, 2.5×, 3.5× f0 (between natural harmonics)
-    for mult in [1.5, 2.5, 3.5, 4.5]:
+        f0 = 180.0
+    amp    = HARMONIC_DECOY_AMP * _rms(channel)
+    decoy  = np.zeros_like(channel)
+    for mult in [1.5, 2.5, 3.5, 4.5, 5.5]:
         freq = f0 * mult
         if freq < sr / 2:
-            phase_offset = rng.uniform(0, 2 * np.pi)
-            decoy += decoy_amp * np.sin(2 * np.pi * freq * t + phase_offset)
-
+            decoy += amp * np.sin(2 * np.pi * freq * t + rng.uniform(0, 2*np.pi))
     return channel + decoy
 
 
-# ── Layer 5: Formant smearing via all-pass filter ────────────────────────────
-
-def formant_smear(channel: np.ndarray, sr: int) -> np.ndarray:
-    """
-    Apply a first-order all-pass IIR filter.
-    All-pass filters preserve amplitude but rotate phase — they smear
-    formant peak timing and subtly shift perceived formant structure just
-    enough to confuse speaker verification, without audible colouration.
-
-    Transfer function: H(z) = (a + z^-1) / (1 + a*z^-1)
-    """
+# ── Layer 6: Formant smearing (all-pass IIR) ──────────────────────────────
+def formant_smear(channel: np.ndarray) -> np.ndarray:
     a = ALLPASS_COEFF
-    # Numerator and denominator coefficients
-    b = np.array([a, 1.0])
-    den = np.array([1.0, a])
-    # Use scipy lfilter via second-order sections
-    from scipy.signal import lfilter
-    return lfilter(b, den, channel).astype(np.float32)
+    return lfilter([a, 1.0], [1.0, a], channel).astype(np.float32)
+
+
+# ── Layer 7: Micro-loudness envelope jitter ───────────────────────────────
+def loudness_envelope_jitter(channel: np.ndarray) -> np.ndarray:
+    """
+    Per-frame gain variation of ±LOUDNESS_JITTER_SIGMA (~0.35 dB).
+    Completely inaudible. Breaks prosody-based speaker verification.
+    """
+    frame    = HOP_LENGTH
+    n_frames = len(channel) // frame
+    out      = channel.copy()
+    for i in range(n_frames):
+        s   = i * frame
+        e   = s + frame
+        gain = np.clip(
+            1.0 + rng.normal(0.0, LOUDNESS_JITTER_SIGMA),
+            1.0 - 3*LOUDNESS_JITTER_SIGMA,
+            1.0 + 3*LOUDNESS_JITTER_SIGMA,
+        )
+        out[s:e] = out[s:e] * gain
+    return out.astype(np.float32)
 
 
 # ══════════════════════════════════════════════
-# 3. Main protection pipeline
+# Main pipeline
 # ══════════════════════════════════════════════
 
 def protect_audio(y: np.ndarray, sr: int) -> np.ndarray:
-    """
-    Apply all 5 protection layers to each channel.
-    Returns float32 stereo array (2, N), peak-normalised.
-    """
     orig_len = y.shape[1]
     out_channels = []
 
     for ch in range(2):
         sig = y[ch].copy()
+        sig = spectral_adversarial_noise(sig, sr)   # 1 — dual-pass FGSM
+        sig = phase_randomise(sig, sr)               # 2 — HF phase jitter
+        sig = randomised_pitch_shift(sig, sr)        # 3 — random chunked shift
+        sig = spectral_centroid_drift(sig, sr)       # 4 — embedding centroid drift
+        sig = harmonic_decoy(sig, sr)                # 5 — decoy harmonics
+        sig = formant_smear(sig)                     # 6 — all-pass formant smear
+        sig = loudness_envelope_jitter(sig)          # 7 — prosody jitter
 
-        # Layer 1 — spectral adversarial noise
-        sig = spectral_adversarial_noise(sig, sr)
-
-        # Layer 2 — phase randomisation
-        sig = phase_randomise(sig, sr)
-
-        # Layer 3 — temporal micro-jitter
-        sig = temporal_micro_jitter(sig)
-
-        # Layer 4 — harmonic decoy
-        sig = harmonic_decoy(sig, sr)
-
-        # Layer 5 — formant smearing
-        sig = formant_smear(sig, sr)
-
-        # Length fix
         if len(sig) > orig_len:
             sig = sig[:orig_len]
         elif len(sig) < orig_len:
             sig = np.pad(sig, (0, orig_len - len(sig)))
-
         out_channels.append(sig.astype(np.float32))
 
     result = np.stack(out_channels, axis=0)
-
-    # Peak normalise (ensure no clipping while preserving all perturbations)
-    peak = np.max(np.abs(result))
+    peak   = np.max(np.abs(result))
     if peak > 1.0:
         result /= peak
-
     return result
 
 
 # ══════════════════════════════════════════════
-# 4. API endpoints
+# API endpoints
 # ══════════════════════════════════════════════
 
 @app.post("/protect-voice")
 async def protect_voice_endpoint(audio: UploadFile = File(...)):
-    """
-    Accepts any audio file, returns a WAV with all 5 protection layers applied.
-    """
     suffix = os.path.splitext(audio.filename)[1] or ".wav"
-
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         tmp.write(await audio.read())
         tmp_path = tmp.name
@@ -335,11 +292,9 @@ async def protect_voice_endpoint(audio: UploadFile = File(...)):
     try:
         y, sr       = load_audio(tmp_path)
         y_protected = protect_audio(y, sr)
-
         buf = io.BytesIO()
         sf.write(buf, y_protected.T, sr, format="WAV", subtype="PCM_24")
         buf.seek(0)
-
     except HTTPException:
         raise
     except Exception as exc:
@@ -347,13 +302,11 @@ async def protect_voice_endpoint(audio: UploadFile = File(...)):
     finally:
         os.remove(tmp_path)
 
-    base_name = os.path.splitext(audio.filename)[0]
+    base = os.path.splitext(audio.filename)[0]
     return StreamingResponse(
         buf,
         media_type="audio/wav",
-        headers={
-            "Content-Disposition": f'attachment; filename="{base_name}_protected.wav"'
-        },
+        headers={"Content-Disposition": f'attachment; filename="{base}_protected.wav"'},
     )
 
 
@@ -361,17 +314,18 @@ async def protect_voice_endpoint(audio: UploadFile = File(...)):
 def health():
     return {
         "status": "ok",
-        "version": "2.0.0",
+        "version": "3.0.0",
         "layers": [
-            "spectral_adversarial_noise",
+            "dual_pass_spectral_adversarial_noise",
             "phase_randomisation",
-            "temporal_micro_jitter",
-            "harmonic_decoy",
+            "randomised_chunked_pitch_shift",
+            "spectral_centroid_drift",
+            "harmonic_decoy_injection",
             "formant_smearing",
+            "loudness_envelope_jitter",
         ],
     }
 
-
 @app.get("/")
 def root():
-    return {"status": "VocalArmor API v2 is running"}
+    return {"status": "VocalArmor API v3 is running"}
