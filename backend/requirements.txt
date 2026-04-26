@@ -8,3 +8,4 @@ soxr
 python-multipart
 audioread
 imageio-ffmpeg
+resampy
